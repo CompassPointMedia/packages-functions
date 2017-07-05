@@ -1,0 +1,1 @@
+This represents all of the `functions` and `group` files that were pre-OOP for Compass Point Media.  There is some good stuff in here, and eventually this will all be moved into LEAN - I REPEAT, LEAN - OOP coding.
