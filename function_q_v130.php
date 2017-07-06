@@ -299,6 +299,9 @@ function q(){
             }
         }
     }
+
+    if($qTesting) prn("db is $db");
+
     //explicit connect to passed database parameter
     if(!empty($explicitDB)){
         if($qTesting)prn('(explicit db='.$db.', line '.__LINE__.')');

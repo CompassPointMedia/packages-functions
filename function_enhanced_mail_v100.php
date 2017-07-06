@@ -44,7 +44,7 @@ $fileArray[]='ReferralAgreement4.pdf';
 for($i=1;$i<=10;$i++){
 	//send out emails to me and luanne
 	echo date('His')."<br />";
-	#enhanced_mail('deborah@relatebase.com','test sam\'s mail program','information <b>here</b>','form@relatebase.com','plain', $fileArray, 0);
+	#enhanced_mail('someone@relatebase.com','test sam\'s mail program','information <b>here</b>','form@relatebase.com','plain', $fileArray, 0);
 	
 	enhanced_mail('sam-git@compasspointmedia.com','test sam\'s mail program','information <b>here</b>','form@relatebase.com','plain', $fileArray, 0);
 

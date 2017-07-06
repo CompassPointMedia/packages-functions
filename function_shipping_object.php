@@ -317,14 +317,14 @@ function shipping_object_exact($options=array()){
 	explain(__LINE__,"shipper=$shipper");
 	$options['object']['shipper']=$shipper;
 	
-	require($GLOBALS['DOCUMENT_ROOT'].'/c/settings/charts/master_zone_list.php');
+	require($_SERVER['DOCUMENT_ROOT'].'/c/settings/charts/master_zone_list.php');
 	//the master zone list states the zone charts for a shipper and origin zip code - $zones internal to this function
 
 	if(count($zones[$shipper]))
 	foreach($zones[$shipper] as $n=>$v){
 		if($v[0] <= $_s['origin_zip'] && $v[1] >= $_s['origin_zip']){
 			explain(__LINE__,"including shipper and v.0={$v[0]}");
-			require($GLOBALS['DOCUMENT_ROOT'].'/c/settings/charts/zones_'.$shipper.'_'.$v[0].'.php');
+			require($_SERVER['DOCUMENT_ROOT'].'/c/settings/charts/zones_'.$shipper.'_'.$v[0].'.php');
 			break;
 		}
 	}
@@ -367,7 +367,7 @@ function shipping_object_exact($options=array()){
 			explain(__LINE__,"zone=$zone");
 			//rate charts of format prices_1_2.php WHERE 1=shipper and 2=service type'
 			ob_start();
-			include($GLOBALS['DOCUMENT_ROOT'].'/c/settings/charts/costs_'.$shipper.'_'.$shipMethod.'.php');
+			include($_SERVER['DOCUMENT_ROOT'].'/c/settings/charts/costs_'.$shipper.'_'.$shipMethod.'.php');
 			$err=ob_get_contents();
 			ob_end_clean();
 			if($err){
