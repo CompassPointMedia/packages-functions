@@ -52,6 +52,9 @@ define('O_ARRAY_ASSOC_MULTI',115);
 define('O_ARRAY_ASSOC_2D',116);
 
 
+define('O_CNX',200);                // returns current connection of function call
+
+
 define('O_TEST',900);
 define('O_TEST_CNX',901);
 define('O_DO_NOT_REMEDIATE',902);
@@ -102,7 +105,9 @@ function q(){
     version 1.04 -- 2004-12-06 -- O_EXTRACT_SINGLE now returns true if recordset, false if not (and does not extract).  First used on WIDI console, more to follow on this version number.
     version 1.03 -- 2004-11-27 -- added O_RETURN_ASSOC, so if I say SELECT Code, Label FROM values, I'll get back an array of $a[Code1]=Label1, $a[Code2]=Label2, etc.; Also fixed error: if the cnx was passed as an array without a db, the err message wasn't specific
      **/
-    global $qx,$qr,$fl,$ln,$cnxString,$qQueryCount,$qtest,$developerEmail,$fromHdrBugs;
+
+    global $qx, $qr, $fl, $ln, $cnxString, $qQueryCount, $qtest, $developerEmail, $fromHdrBugs;
+
     //qr is specific to each query; it's cleared out each time
     unset($qr);
     global $qr;
@@ -127,6 +132,7 @@ function q(){
     //IMPORTANT: the standard relatebase connection is going to pass away because it stores the password on the system
     //there should be a master summary of all queries and their stats that can be stored in an array and printed
      **/
+
     //we globalize arg list in case we need to use remediation
     $arg_list=func_get_args();
     if($qx['useRemediation'] && $qx['remediationStep'] && !in_array(O_DO_NOT_REMEDIATE,$arg_list)){
@@ -134,13 +140,12 @@ function q(){
         mail($developerEmail, 'Error, calling q in remediation mode, '.__FILE__.', line '.__LINE__,get_globals(),$fromHdrBugs);
         echo '<strong>Calling q() in remediation mode line '.__LINE__.', here are the args:</strong><br />';
         prn($arg_list);
-    }else{
         //OK
     }
 
-    $knownConst=array(1,2,3,4,20,21,22,23,40,41,42,43,44,45,100,101,103,104,105,106,107,108,109,110,111,115,116,900,901,902); //this prevents passing constants from an older version to the function
+    $knownConst=array(1,2,3,4,20,21,22,23,40,41,42,43,44,45,100,101,103,104,105,106,107,108,109,110,111,115,116,200,900,901,902); //this prevents passing constants from an older version to the function
     for($i=0; $i < count($arg_list); $i++){
-        //if($qtest) echo $arg_list[$i] . ':' . preg_match('/^(O_|ERR_|C_|E_)[A-Z_]+$/',$arg_list[$i]) . ':' . is_int($arg_list[$i]) . ':' . in_array($arg_list[$i],$knownConst) . '<br />';
+
         if(@preg_match('/^(O_|ERR_|C_|E_)[A-Z_]+$/',$arg_list[$i]) || (is_int($arg_list[$i]) && !@in_array($arg_list[$i],$knownConst))){
             exit('Attempting to call function q() with an unrecognized or outdated constant or integer: '.$arg_list[$i]);
         }
@@ -158,11 +163,17 @@ function q(){
                         $arg_list[$i]==901 ? $qTestingCnx=true : '';
                         $arg_list[$i]==902 ? $qDoNotRemediate=true : '';
                         break(2);
-                    case ($arg_list[$i]>99): $out=$arg_list[$i];
+                    case $arg_list[$i] > 199:
+                        $info = $arg_list[$i];
                         break(2);
-                    case ($arg_list[$i]>19 && $arg_list[$i]<40): $errDieMethod=$arg_list[$i];
+                    case ($arg_list[$i]>99):
+                        $out=$arg_list[$i];
                         break(2);
-                    case ($arg_list[$i]>0):	$cnx=$arg_list[$i];
+                    case ($arg_list[$i]>19 && $arg_list[$i]<40):
+                        $errDieMethod=$arg_list[$i];
+                        break(2);
+                    case ($arg_list[$i]>0):
+                        $cnx=$arg_list[$i];
                         break(2);
                 }
             case is_float($arg_list[$i]) && $arg_list[$i]<1:
@@ -171,11 +182,9 @@ function q(){
                 break;
             default:
                 //strings are queries
-                //for pre 1.02 version constructs, ignore blank values
-                $x=$arg_list[$i];
-                if(!trim($x))continue;
+                if(!trim($arg_list[$i]))continue;
                 //presumes db names follow this regex, might pull this out for version 1.2
-                preg_match('/^[_a-z]+[a-z0-9_]*$/',$x)?$explicitDB=$x:$sql=$x;
+                preg_match('/^[_a-z]+[a-z0-9_]*$/', $arg_list[$i]) ? $explicitDB=$arg_list[$i] : $sql=$arg_list[$i];
         }
     }
 
@@ -193,15 +202,18 @@ function q(){
         if($errDieMethod=$qx['defaultQDieMethod']){
         }else $errDieMethod=ERR_DIE;
     }
-    if(!$sql)global $sql;
+
     unset($qr['err']);
-    if(!trim($sql)){
+
+    // Get SQL query
+    $sql=trim($sql);
+    if(empty($sql) && empty($info)){
         //this will not be remediated
         if($qTesting)prn('error line '.__LINE__);
         return sub_e($errDieMethod, E_NO_SQL_QUERY, $arg_list, '', $qDoNotRemediate, $queryPassType);
     }
-    $sql=trim($sql);
-    if(!empty($qTesting)) prn($sql);
+    if(!empty($qTesting) && !empty($sql)) prn($sql);
+
     //evaluate the sql query for type, not developed
     if(empty($cnx)){
         #1. default connection method declared
@@ -216,11 +228,11 @@ function q(){
         }
     }
     if(!empty($qTestingCnx)){
-        echo 'cnx: ';
+        prn('cnx:');
         prn($cnx);
     }
     //set up parameters for connection
-    switch(true){
+    switch($switch = true){
         case is_array($cnx):
             //array MUST be in this order
             $host=$cnx[0];
@@ -298,6 +310,11 @@ function q(){
                 return sub_e($errDieMethod, $problem2, $arg_list, array(mysqli_errno($$cnxString),mysqli_error($$cnxString)), $qDoNotRemediate, $queryPassType);
             }
         }
+    }
+
+    if($info == O_CNX){
+        // Return the connection resource
+        return $$cnxString;
     }
 
     if($qTesting) prn("db is $db");
