@@ -33,6 +33,7 @@ define('E_NO_RB_CNX_VARS',42);
 define('E_BAD_DB_CNX',43);
 define('E_BAD_RB_CNX',44);
 define('E_QUERY_FAILED',45);
+define('E_NO_SUP_CNX_VARS',46);
 
 //output types 100+
 define('O_VALUE',100);
@@ -180,15 +181,15 @@ function q(){
 
     $qQueryCount++;
     $qr['idx']=$qQueryCount;
-    $qr['file']=($fl?$fl:'UNKNOWN');
-    $qr['line']=($_ln_?$_ln_*10000:($ln?$ln:'UNKNOWN'));
+    $qr['file']=(!empty($fl) ? $fl : 'UNKNOWN');
+    $qr['line']=(!empty($_ln_) ? $_ln_*10000 : (!empty($ln) ? $ln : 'UNKNOWN'));
 
-    if($qTesting)prn($arg_list);
+    if(!empty($qTesting)) prn($arg_list);
     //get the query and default values
-    $cc=$_SESSION['currentConnection'];
-    $cu=$_SESSION['cnx'][$cc]['userName'];
-    $queryPassType=(func_num_args()>0?'passed':'globally available');
-    if(!$errDieMethod){
+    $cc = !empty($_SESSION['currentConnection']) ? $_SESSION['currentConnection'] : '';
+    $cu = !empty($_SESSION['cnx'][$cc]['userName']) ? $_SESSION['cnx'][$cc]['userName'] : '';
+    $queryPassType = (func_num_args()>0?'passed':'globally available');
+    if(empty($errDieMethod)){
         if($errDieMethod=$qx['defaultQDieMethod']){
         }else $errDieMethod=ERR_DIE;
     }
@@ -200,9 +201,9 @@ function q(){
         return sub_e($errDieMethod, E_NO_SQL_QUERY, $arg_list, '', $qDoNotRemediate, $queryPassType);
     }
     $sql=trim($sql);
-    if($qTesting)prn($sql);
+    if(!empty($qTesting)) prn($sql);
     //evaluate the sql query for type, not developed
-    if(!$cnx){
+    if(empty($cnx)){
         #1. default connection method declared
         if($cnx=$qx['defCnxMethod']){
             //OK
@@ -214,7 +215,7 @@ function q(){
             $cnx=C_DEFAULT;
         }
     }
-    if($qTestingCnx){
+    if(!empty($qTestingCnx)){
         echo 'cnx: ';
         prn($cnx);
     }
@@ -235,7 +236,7 @@ function q(){
             $host=$SUPER_MASTER_HOSTNAME;
             $user=$SUPER_MASTER_USERNAME;
             $pass=$SUPER_MASTER_PASSWORD;
-            !strlen($db)?$db=$SUPER_MASTER_DATABASE:'';
+            empty($db) ? $db = $SUPER_MASTER_DATABASE:'';
             $cnxString='sup_cnx';
             $problem=E_NO_SUP_CNX_VARS;
             $problem2=E_BAD_DB_CNX;
@@ -246,8 +247,8 @@ function q(){
             $host=$MASTER_HOSTNAME;
             $user=$MASTER_USERNAME;
             $pass=$MASTER_PASSWORD;
-            !strlen($db)?$db=$MASTER_DATABASE:'';
-            if($qTesting){
+            empty($db) ? $db = $MASTER_DATABASE : '';
+            if(!empty($qTesting)){
                 prn("$host:$user:$pass:$db");
             }
             $cnxString='rb_cnx';
@@ -272,26 +273,26 @@ function q(){
     } //-- end connection handling
     //connect and select database
     global $$cnxString;
-    if($qTestingCnx)echo '<br />connection: ('.$cnxString.') '.($$cnxString ? $$cnxString : 'not established');
+    if(!empty($qTestingCnx)) echo '<br />connection: ('.$cnxString.') '.($$cnxString ? $$cnxString : 'not established');
     if(!$$cnxString){
         if(!$host || !$user){
             //no vars passed to connect
             if($qTesting)prn('error line '.__LINE__);
             return sub_e($errDieMethod, $problem, $arg_list, '', $qDoNotRemediate, $queryPassType);
         }
-        if($qTestingCnx)echo "<br />connecting with $host, $user, ***";
+        if(!empty($qTestingCnx)) echo "<br />connecting with $host, $user, ***";
         ob_start();
         $$cnxString=mysqli_connect($host, $user, $pass);
         $x=ob_get_contents();
         ob_end_clean();
-        if($qTestingCnx)echo '<br />mysqli_connect result: '. $$cnxString;
+        if(!empty($qTestingCnx))echo '<br />mysqli_connect result: '. $$cnxString;
         if(!$$cnxString || strlen($x)){
             if($qTesting)prn('error line '.__LINE__.': ('.$x.')');
             return sub_e($errDieMethod, E_BAD_DB_CNX, $arg_list, $x, $qDoNotRemediate, $queryPassType);
         }
         if($db){
             $x=mysqli_select_db($$cnxString, $db);
-            if($qTestingCnx)echo '<br />db='.$db.', returned '.$x;
+            if(!empty($qTestingCnx)) echo '<br />db='.$db.', returned '.$x;
             if(!$x){
                 if($qTesting)prn('error line '.__LINE__);
                 return sub_e($errDieMethod, $problem2, $arg_list, array(mysqli_errno($$cnxString),mysqli_error($$cnxString)), $qDoNotRemediate, $queryPassType);
@@ -299,7 +300,7 @@ function q(){
         }
     }
     //explicit connect to passed database parameter
-    if($explicitDB){
+    if(!empty($explicitDB)){
         if($qTesting)prn('(explicit db='.$db.', line '.__LINE__.')');
         $x=mysqli_select_db($$cnxString, $explicitDB);
         if(!$x){
@@ -320,7 +321,7 @@ function q(){
         $f=$qx['slowQueryFunction'];
         $f($arg_list);
     }
-    if($qTesting)prn($result);
+    if(!empty($qTesting)) prn($result);
     if(mysqli_error($$cnxString)){
         if($qTesting)prn(mysqli_errno($$cnxString) . ' : '.mysqli_error($$cnxString));
         //here is the actual failed query section
@@ -335,7 +336,7 @@ function q(){
     }else unset($qr['insert_id']);
     if(preg_match('/^(INSERT INTO)|(DELETE\b)|(UPDATE)|(REPLACE INTO)|(TRUNCATE)/i',$sql)){
         $qr['affected_rows']=mysqli_affected_rows($$cnxString);
-    }else unset($qr[affected_rows]);
+    }else unset($qr['affected_rows']);
     if(preg_match('/^SELECT/i',$sql)){
         $qr['count']=mysqli_num_rows($result);
     }else unset($qr['count']);
@@ -345,7 +346,7 @@ function q(){
     }
     //the following operations only apply to a SELECT query
     unset($r);
-    switch(true){
+    switch($switch = true){
         case $out == O_AFFECTEDROWS:
             if(!preg_match('/^(INSERT|UPDATE|DELETE|REPLACE)/i',$sql))$qr['warning']='Query inconsistent with output constant';
             $r= $qr['affected_rows'];
@@ -366,7 +367,7 @@ function q(){
             break;
         case $out == O_ROW:
             $rd=mysqli_fetch_array($result,MYSQLI_ASSOC);
-            $qr[output]=$rd;
+            $qr['output']=$rd;
             $r= $rd;
             break;
         case $out == O_EXTRACT_ROW:
