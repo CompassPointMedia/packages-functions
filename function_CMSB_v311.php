@@ -892,6 +892,8 @@ function CMSBUpdate($options=array()){
 		Content='$CMS',
 		Options='$Options',
 		EditNotes='$EditNotes',
+		CreateDate = NOW(),
+		Creator = '".($_SESSION['systemUserName'] ? $_SESSION['systemUserName'] : 'administrator')."',
 		Editor='".($_SESSION['systemUserName'] ? $_SESSION['systemUserName'] : 'administrator')."'", O_INSERTID, $cnx);
 		prn($qr);
 	}else if($method=='static:parameters'){
@@ -928,6 +930,8 @@ function CMSBUpdate($options=array()){
 		Content='$CMS',
 		Options='$Options',
 		EditNotes='$EditNotes',
+		CreateDate = NOW(),
+		Creator = '".($_SESSION['systemUserName'] ? $_SESSION['systemUserName'] : 'administrator')."',
 		Editor='".($_SESSION['systemUserName'] ? $_SESSION['systemUserName'] : 'administrator')."'", O_INSERTID, $cnx);
 		prn($qr);
 	}else if($method=='dynamic:simple'){
@@ -1000,4 +1004,3 @@ $CMSBx['defaultTableStructure']='CREATE TABLE `'.$CMSBx['defaultTableName'].'` (
  KEY `Objects_ID` (`Objects_ID`),
  KEY `Section` (`Section`)
 ) ENGINE=MyISAM AUTO_INCREMENT=62 DEFAULT CHARSET=latin1 COMMENT=\'Created by function CMSB version '.$functionVersions['CMSB'].'\'';
-?>
