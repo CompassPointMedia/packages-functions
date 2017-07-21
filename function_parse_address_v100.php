@@ -6,7 +6,7 @@ function parse_address($address){
 	
 	2010-07-31 now in production; minor mods, and allowed for 1204-A Marlton in the number
 	2004-10-05 Added HC n Box n, Star Route to function
-	2004-10-04 Sam Fullman (compasspointmedia.com)
+	2004-10-04 Sam Fullman (compasspoint-sw.com)
 	function notes
 	this function requires an address that has been stripped of periods and commas.  I don't believe commas are part of the USPS required addressing standards so I don't want to use them to try to get parsing information.
 	this function starts from the RIGHT hand side, pulling unit numbers and other features like the direction (N,S,E,W).

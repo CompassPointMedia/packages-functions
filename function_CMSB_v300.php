@@ -846,5 +846,5 @@ $CMSBx['defaultTableStructure']='CREATE TABLE `'.$CMSBx['defaultTableName'].'` (
  `Editor` char(20) NOT NULL default \'cmsb-system\',
  PRIMARY KEY  (`ID`),
  KEY `Regions_ID` (`Sections_ID`)
-) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT=\'Version 1.0.0 Created 2008-12-17 by CPM sam-git@compasspointmedia.com\'';
+) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=latin1 COMMENT=\'Version 1.0.0 Created 2008-12-17 by CPM sam-git@samuelfullman.com\'';
 ?>

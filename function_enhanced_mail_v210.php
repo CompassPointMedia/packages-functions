@@ -77,7 +77,7 @@ for($i=1;$i<=10;$i++){
 	echo date('His')."<br>";
 	#enhanced_mail('luanne@relatebase.com','test sam\'s mail program','information <b>here</b>','form@relatebase.com','plain', $fileArray, 0);
 	
-	enhanced_mail('sam-git@compasspointmedia.com','test sam\'s mail program','information <b>here</b>','form@relatebase.com','plain', $fileArray, 0);
+	enhanced_mail('sam-git@samuelfullman.com','test sam\'s mail program','information <b>here</b>','form@relatebase.com','plain', $fileArray, 0);
 
 }
 *****/
