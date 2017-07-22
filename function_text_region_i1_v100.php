@@ -100,8 +100,8 @@ function text_region_i1($region='mainbody', $folder='', $page='', $options=array
 			?>
 			<div style="border:1px dotted DARKBLUE;padding:35px;">
 				No content present for text region <?php echo $region?>; you must be in admin mode to add content!<br />
-				<a href="<?php echo $thisfolder ? '../' : ''?>admin.php?src=<?php echo urlencode($_SERVER['PHP_SELF']) . ($_SERVER['QUERY_STRING'] ? urlencode($_SERVER['QUERY_STRING']) : '')?>">Admin Mode</a></div>
-<?php
+				<a href="<?php echo $thisfolder ? '../' : ''?>juliet-site-editor?src=<?php echo urlencode($_SERVER['PHP_SELF']) . ($_SERVER['QUERY_STRING'] ? urlencode($_SERVER['QUERY_STRING']) : '')?>">Admin Mode</a></div>
+                <?php
 		}
 		
 	}
