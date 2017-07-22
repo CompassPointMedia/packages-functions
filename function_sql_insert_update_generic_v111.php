@@ -7,9 +7,23 @@ function noslashes($x){
 }
 $functionVersions['sql_insert_update_generic']=1.11;
 function sql_insert_update_generic($db, $table, $mode, $options=array()){
-	global $sql_insert_update_generic, $dateStamp, $timeStamp, $qr, $qx, $fl, $ln, $developerEmail, $fromHdrBugs;
-	unset($sql_insert_update_generic['failList'],$sql_insert_update_generic['dataintegrity'],$sql_insert_update_generic['fields'],$sql_insert_update_generic['where']);
-	$fl=__FILE__;
+	global
+    $sql_insert_update_generic,
+    $dateStamp,
+    $timeStamp,
+    $qr,
+    $qx,
+    $fl,
+    $ln,
+    $developerEmail,
+    $fromHdrBugs;
+	unset(
+	    $sql_insert_update_generic['failList'],
+        $sql_insert_update_generic['dataintegrity'],
+        $sql_insert_update_generic['fields'],
+        $sql_insert_update_generic['where']
+    );
+	if(empty($fl)) $fl=__FILE__;
 	/***
 	2012-06-08: added for mysql:function() not being quoted 
 	2012-01-28: changed setCtrlFields as default=true
@@ -52,7 +66,7 @@ function sql_insert_update_generic($db, $table, $mode, $options=array()){
 	if(!isset($allowLogicalFieldConversion))$allowLogicalFieldConversion=true;
 	if(!isset($allowHumanDatetimeConversion))$allowHumanDatetimeConversion=true;
 	
-	if(!$location)$location='GLOBALS';
+	if(empty($location)) $location='GLOBALS';
 	global $globalSetCtrlFields;
 	if(!isset($setCtrlFields))$setCtrlFields=(isset($globalSetCtrlFields)?$globalSetCtrlFields:true);
 	if(!isset($addslashes))$addslashes=false;
@@ -197,6 +211,3 @@ function sql_insert_update_generic($db, $table, $mode, $options=array()){
 	return $sql;
 }
 
-
-
-?>
