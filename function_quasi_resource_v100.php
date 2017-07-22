@@ -12,7 +12,7 @@ function quasi_resource(){
 	q("DELETE FROM bais_resources WHERE re_rtid IS NULL AND re_creator='".$_SESSION[admin][userName]."' AND re_session !='$key'");
 	//we should not need to purge previous resources in this session
 	if($a=q("SELECT re_id FROM bais_resources WHERE re_creator='".$_SESSION[admin][userName]."' AND re_rtid IS NULL AND re_session ='$key' AND re_sessionidx!='".$_SESSION[admin][currentResourceIndex]."'",O_VALUE)){
-		mail('reroute@compasspointmedia.com','Bad inter-session resource for user '.$_SESSION[systemUserName],'File '.__FILE__.', line: '.__LINE__.', \n This means that a previous resource never got a type (re_rtid) assigned and can be presumed incomplete\n Total count: '.$qr['count'],'From: bugreports@reasons.org');
+		mail('samuelf@compasspoint-sw.com','Bad inter-session resource for user '.$_SESSION[systemUserName],'File '.__FILE__.', line: '.__LINE__.', \n This means that a previous resource never got a type (re_rtid) assigned and can be presumed incomplete\n Total count: '.$qr['count'],'From: bugreports@reasons.org');
 	}
 	if(!($re_id=q("SELECT re_id FROM bais_resources WHERE re_session='$key' AND re_sessionidx='".$_SESSION['admin'][currentResourceIndex]."' AND re_creator='".$_SESSION[admin][userName]."'",O_VALUE))){
 		//insert this session user

@@ -59,7 +59,7 @@ function rtcs_declare_field_attributes_mysql($a, $includeName=true, $useRBVars=t
 	global $dbTypeArray;
 	if($includeName) $s='`'.$DNAME.'` ';
 	if(strtolower($dbTypeArray[$DTYPE])=='enum' || strtolower($dbTypeArray[$DTYPE])=='set'){
-		mail($adminEmail,'use of enum and set not developed in rtcs_declare_field_type_mysql','File: '.$_SERVER['PHP_SELF'].', line: '.__LINE__, ' Table: '.$table. ', Parent DB: '. $db. ' Target DB: '.$targetDb,'From:bugreports@relatebase.com');
+		mail($adminEmail,'use of enum and set not developed in rtcs_declare_field_type_mysql','File: '.$_SERVER['PHP_SELF'].', line: '.__LINE__, ' Table: '.$table. ', Parent DB: '. $db. ' Target DB: '.$targetDb,'From:bugreports@compasspoint-sw.com');
 		$s.='char(255)';
 	}else{
 		$s.=$dbTypeArray[$DTYPE];

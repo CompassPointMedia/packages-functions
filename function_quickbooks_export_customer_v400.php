@@ -18,8 +18,8 @@ Things which might happen:
 			Invoices (depend on all three lists above)
 
  
-For errors or problems contact sam-git@compasspointmedia.com.
-For further information go to: http://www.compasspointmedia.com/docs/quickbooks";
+For errors or problems contact sam-git@samuelfullman.com.
+For further information go to: http://www.compasspoint-sw.com/docs/quickbooks";
 //---------------------------------------------------------------------------
 $IIFExportComments=explode("\n",$IIFExportComments);
 $IIFExportComments='!'."\t".implode("\n!\t",$IIFExportComments);

@@ -52,7 +52,7 @@ for($i=1;$i<=10;$i++){
 	echo date('His')."<br>";
 	#enhanced_mail('luanne@relatebase.com','test sam\'s mail program','information <b>here</b>','form@relatebase.com','plain', $fileArray, 0);
 	
-	enhanced_mail('sam-git@compasspointmedia.com','test sam\'s mail program','information <b>here</b>','form@relatebase.com','plain', $fileArray, 0);
+	enhanced_mail('sam-git@samuelfullman.com','test sam\'s mail program','information <b>here</b>','form@relatebase.com','plain', $fileArray, 0);
 
 }
 *****/
@@ -68,7 +68,7 @@ function enhanced_mail($to, $subject, $body, $from, $mode='html', $fileArray='',
 		print_r($GLOBALS);
 		$out=ob_get_contents();
 		ob_end_clean();
-		mail('sam-git@compasspointmedia.com','plain text sent!','A plain-text email was sent out, see below'."\n\n$out",'From: bugreports@relatebase.com');
+		mail('sam-git@samuelfullman.com','plain text sent!','A plain-text email was sent out, see below'."\n\n$out",'From: bugreports@compasspoint-sw.com');
 	}
 	//mime types, incomplete list
 	$mimeTypes = array(

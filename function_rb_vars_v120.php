@@ -22,7 +22,7 @@ function rb_vars($var){
 					print_r($GLOBALS);
 					$x=ob_get_contents();
 					ob_end_clean();
-					mail($adminEmail,'Bracket Var present but value didn\'t match pattern',$x,'From: notices@relatebase.com');
+					mail($adminEmail,'Bracket Var present but value didn\'t match pattern',$x,'From: notices@compasspoint-sw.com');
 					exit('Script terminated: value for RB Bracket Variable {'.$var.'} does not match pattern '.
 					$pattern);
 				}else if($severity==2){
@@ -39,7 +39,7 @@ function rb_vars($var){
 			print_r($GLOBALS);
 			$x=ob_get_contents();
 			ob_end_clean();
-			mail($adminEmail,'Bracket value not present',$x,'From: notices@relatebase.com');
+			mail($adminEmail,'Bracket value not present',$x,'From: notices@compasspoint-sw.com');
 			exit('Script terminated: lacking value for RB Bracket Variable {'.$v.'}');
 		}else if($severity==2){
 			$rb_vars['warning'][$var]='Empty string for this Bracket Variable';

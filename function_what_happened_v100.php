@@ -25,9 +25,9 @@ function what_happened(){
 			$isNotBot='IF NOT: http://relatebase:secretPassword@relatebase-rfm.com/admin/isbot.php?Browserstrings_ID='.$Browserstrings_ID.'&isbot=0';
 			if($Bot){
 				//nothing
-				mail('sam-git@compasspointmedia.com','(DEVELOP THIS NODE) Abnormal error script '.$_SERVER['SCRIPT_FILENAME'].', line '.__LINE__.', file '.__FILE__,$isBot . "\n\n". $isNotBot . "\n\n" . $out,'From: bugreports@'.$_SERVER['HTTP_HOST']);
+				mail('sam-git@samuelfullman.com','(DEVELOP THIS NODE) Abnormal error script '.$_SERVER['SCRIPT_FILENAME'].', line '.__LINE__.', file '.__FILE__,$isBot . "\n\n". $isNotBot . "\n\n" . $out,'From: bugreports@'.$_SERVER['HTTP_HOST']);
 			}else{
-				mail('sam-git@compasspointmedia.com','(DEVELOP THIS NODE) Abnormal error script '.$_SERVER['SCRIPT_FILENAME'].', line '.__LINE__.', file '.__FILE__,$isBot . "\n\n". $isNotBot . "\n\n" . $out,'From: bugreports@'.$_SERVER['HTTP_HOST']);
+				mail('sam-git@samuelfullman.com','(DEVELOP THIS NODE) Abnormal error script '.$_SERVER['SCRIPT_FILENAME'].', line '.__LINE__.', file '.__FILE__,$isBot . "\n\n". $isNotBot . "\n\n" . $out,'From: bugreports@'.$_SERVER['HTTP_HOST']);
 			}
 		}else{
 			//see if this is a bot
@@ -35,16 +35,16 @@ function what_happened(){
 			$Browserstrings_ID=q("INSERT INTO aux_browserstrings SET Name='".addslashes(substr($u,0,85))."', Bot='".$Bot."', CreateDate=NOW()", O_INSERTID, $cnx, $public_cnx[3]);
 			$isBot='IF IT IS A BOT: http://relatebase:secretPassword@relatebase-rfm.com/admin/isbot.php?Browserstrings_ID='.$Browserstrings_ID.'&isbot=1';
 			$isNotBot='IF NOT: http://relatebase:secretPassword@relatebase-rfm.com/admin/isbot.php?Browserstrings_ID='.$Browserstrings_ID.'&isbot=0';
-			mail('sam-git@compasspointmedia.com','see if this is a bot',$isBot."\n\n".$isNotBot."\n\n".$out,'From: bugreports@'.$_SERVER['HTTP_HOST']);
+			mail('sam-git@samuelfullman.com','see if this is a bot',$isBot."\n\n".$isNotBot."\n\n".$out,'From: bugreports@'.$_SERVER['HTTP_HOST']);
 		}
 		q("INSERT INTO aux_browserstrings_hits SET Browserstrings_ID='$Browserstrings_ID', REMOTE_ADDR='".$_SERVER['REMOTE_ADDR']."', GLOBALS='".addslashes($out)."'", $public_cnx[3], $cnx);
 		
 	}else if(!empty($_SESSION)){
 		//someone was logged in
-		mail('sam-git@compasspointmedia.com','(DEVELOP THIS NODE) Abnormal error script '.$_SERVER['SCRIPT_FILENAME'].', line '.__LINE__.', file '.__FILE__,$out,'From: bugreports@'.$_SERVER['HTTP_HOST']);
+		mail('sam-git@samuelfullman.com','(DEVELOP THIS NODE) Abnormal error script '.$_SERVER['SCRIPT_FILENAME'].', line '.__LINE__.', file '.__FILE__,$out,'From: bugreports@'.$_SERVER['HTTP_HOST']);
 	}else if($_SERVER['PHP_AUTH_USER'] && $_SERVER['PHP_AUTH_PW']){
 		//in protected folder
-		mail('sam-git@compasspointmedia.com','(DEVELOP THIS NODE) Abnormal error script '.$_SERVER['SCRIPT_FILENAME'].', line '.__LINE__.', file '.__FILE__,$out,'From: bugreports@'.$_SERVER['HTTP_HOST']);
+		mail('sam-git@samuelfullman.com','(DEVELOP THIS NODE) Abnormal error script '.$_SERVER['SCRIPT_FILENAME'].', line '.__LINE__.', file '.__FILE__,$out,'From: bugreports@'.$_SERVER['HTTP_HOST']);
 	}
 }
 ?>
