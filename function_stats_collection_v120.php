@@ -223,7 +223,7 @@ function stats_collection($options=array()){
 	unset($statsUserID);
 	if($_SESSION['identity']){
 		//we tie into addr_contacts for now
-		$statsUserID=$_SESSION['cnx'][$MASTER_DATABASE]['primaryKeyValue'];
+		$statsUserID=$_SESSION['cnx'][$acct]['primaryKeyValue'];
 		$IDLevel=4;
 	}else{
 		$usrs=q("SELECT Contacts_ID FROM stats_MachinesContacts WHERE Machines_ID='$Machines_ID'", O_COL,ERR_ECHO, $cnx);
