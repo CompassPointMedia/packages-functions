@@ -48,7 +48,7 @@ function get_image($name, $images=array(), $options=array()){
 			}
 		}
 		if(!$possible)return;
-		if(!function_exists('subkey_sort'))require($FUNCTION_ROOT.'/function_array_subkey_sort_v203.php');
+		if(!function_exists('subkey_sort'))require($FUNCTION_ROOT.'/function_array_subkey_sort_v300.php');
 		$possible=subkey_sort($possible,'length');
 		if($get_imageReturnMethod=='string'){
 			return current(array_keys($possible));

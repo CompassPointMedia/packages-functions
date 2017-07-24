@@ -30,4 +30,3 @@ function subkey_sort($a, $key, $sort='ASC'){
 	}
 	return $b;
 }
-?>

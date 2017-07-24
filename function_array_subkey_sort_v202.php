@@ -72,4 +72,3 @@ function subkey_sort($a, $key, $options=array()){
 	}
 	return $b;
 }
-?>

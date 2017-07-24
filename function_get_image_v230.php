@@ -98,7 +98,7 @@ function get_image($names, $images=array(), $options=array()){
 	}
 	if($debug)error_alert(look);
 	if(count($get_image)){
-		if(!function_exists('subkey_sort'))require($FUNCTION_ROOT.'/function_array_subkey_sort_v203.php');
+		if(!function_exists('subkey_sort'))require($FUNCTION_ROOT.'/function_array_subkey_sort_v300.php');
 		$get_image=subkey_sort($get_image,'length');
 		//return methods here
 		if($return=='multi'){
