@@ -88,7 +88,8 @@ $qx['defaultQDieMethod']=ERR_DIE;
 if(!isset($qx['slowQueryThreshold']))$qx['slowQueryThreshold']=0; //0 means no threshold
 if(!@$qx['slowQueryFunction'])$qx['slowQueryFunction']='q_notify';
 
-$functionVersions['q']=1.20;
+$functionVersions['q']=1.30;
+$qs = 0;
 function q(){
     /**
      * version 1.30 --
