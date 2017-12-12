@@ -12,17 +12,16 @@ function get_contents(){
 	unset($gcontents);
 	if($a=func_get_args()){
 		foreach($a as $v){
-			if(in_array(strtolower($v),$cmds)){
-				$v=strtolower($v);
+			if(in_array($v, $cmds)){
 				$$v=true;
 			}
 		}
 	}
 	$gcontents['out']=ob_get_contents();
-	if($trim)$gcontents['out']=trim($gcontents['out'])."\n";
+	if(!empty($trim)) $gcontents['out']=trim($gcontents['out'])."\n";
 	ob_end_clean();
-	if($striptabs)$gcontents['out']=str_replace("\t",'',$gcontents['out']);
-	if($beginnextbuffer){
+	if(!empty($striptabs)) $gcontents['out']=str_replace("\t",'',$gcontents['out']);
+	if(!empty($beginnextbuffer)){
 		ob_start();
 	}else{
 		return $gcontents['out'];
