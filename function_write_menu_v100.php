@@ -18,7 +18,7 @@ function write_menu($options=array()){
 
 
 	extract($options);
-	if(!$menuID)$menuID='definitionTools';
+	if(!$menuID) $menuID='definitionTools';
 
     if(!$objectRegex) error_alert('You must declare the regular expression for the object(s) you wish to bind this context menu to');
     if(!$alignment) $alignment='mouse,20,-40';
