@@ -48,12 +48,21 @@ function tree_image($options=array()){
 }
 $functionVersions['tree_id_to_path']=1.00;
 function tree_id_to_path($n,$options=array()){
-	global $tree_id_to_path,$qx;
-	extract($options);
-	if(!$cnx)$cnx=$qx['defCnxMethod'];
-	$row=q("SELECT Tree_ID, Name, Type FROM relatebase_tree WHERE ID='$n'", O_ROW,$cnx);
-	if($row['Type']=='file')$tree_id_to_path=$row;
-	return ($row ? tree_id_to_path($row['Tree_ID'],$options).'/'.$row['Name'] : '');
+    /*
+     * 2017-12-04 - q() call contains a nasty hack in the 4th parameter, solves a problem encountered in GL Franchise where the db it's looking for is cpm151 and not cpm151_sanmarcos.  This is going to take visualization across all the coding to solve and not break elsewhere.
+     */
+    global $tree_id_to_path,$qx;
+    extract($options);
+
+    if(empty($cnx)) $cnx=$qx['defCnxMethod'];
+    $row=q(
+        "SELECT Tree_ID, Name, Type FROM relatebase_tree WHERE ID='$n'",
+        O_ROW,
+        $cnx,
+        (!empty($_SESSION['currentConnection']) ? $_SESSION['currentConnection'] : '')
+    );
+    if($row['Type']=='file') $tree_id_to_path=$row;
+    return ($row ? tree_id_to_path($row['Tree_ID'],$options).'/'.$row['Name'] : '');
 }
 function tree_path_to_id($n){
 	//normal string passage would be images/assets/spacer.gif OR /images/assets/spacer.gif - the left / is removed
