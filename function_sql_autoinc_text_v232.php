@@ -23,7 +23,9 @@ function sql_autoinc_text($table, $field, $root, $options=array()){
 	//2007-10-05: changed code handling slightly to use leftsep again with better logic - NOTE leftSep and rightSep are made to fit in a regular expression statement
 	//2007-01-23: switched over to q() for the query and can now pass the connection
 	//note the pad value, if 3, would produce 001, 002, 003, 004, 005, etc.  Numbers above 999 would still increment normally however
-	global $qr,$qx,$fl,$ln,$developerEmail, $fromHdrBugs;
+	global $qx, $developerEmail, $fromHdrBugs;
+
+
 	extract($options);
 	if(!isset($trimRightNumbers))$trimRightNumbers='/[ 0-9]*$/';
 	if(!isset($returnLowerCase))$returnLowerCase=true;
@@ -56,9 +58,9 @@ function sql_autoinc_text($table, $field, $root, $options=array()){
 		$a=array();
 		foreach($table as $n=>$v){
 			$sql="SELECT ".$v['field']." from ".$v['table']." where ".$v['field']." like '$root%'";
-			if(trim($where[$n])) $sql.=" AND ".trim(preg_replace('/^\s*AND\s+/i','',$where[$n]));
+			if(!empty($where[$n])) $sql.=" AND ".trim(preg_replace('/^\s*AND\s+/i','',$where[$n]));
 			$sql.=" ORDER BY ".$v['field'];
-			$b=q($sql, $cnx, O_COL);
+			$b=q($sql, $cnx, O_COL, O_DO_NOT_REMEDIATE);
 			$a=array_merge($a,$b);
 		}
 		sort($a);
@@ -66,13 +68,12 @@ function sql_autoinc_text($table, $field, $root, $options=array()){
 		$sql="SELECT $field from $table WHERE $field like '$root%'";
 	
 		//where clause allows more targeted selection for the increment
-		if(trim($where)) $sql.=" AND ".trim(preg_replace('/^\s*AND\s+/i','',$where));
+		if(!empty($where)) $sql.=" AND ".trim(preg_replace('/^\s*AND\s+/i','',$where));
 		$sql.=" ORDER BY $field";
-		$a=q($sql, $cnx, O_COL);
+		$a=q($sql, $cnx, O_COL, O_DO_NOT_REMEDIATE);
 	}
-	
+
 	if(count($a)){
-		//prn($qr);
 		$len=strlen($root);
 		foreach($a as $present){
 			if(strtolower($present)==strtolower(stripslashes($root))){
@@ -99,4 +100,3 @@ function sql_autoinc_text($table, $field, $root, $options=array()){
 	if($returnLowerCase)$root=strtolower($root);
 	return $root;
 }
-?>

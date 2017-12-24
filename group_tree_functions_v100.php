@@ -10,6 +10,7 @@ function tree_functions(){
 	//placeholder
 	return true;
 }
+
 $functionVersions['tree_image']=1.00;
 function tree_image($options=array()){
 	/*
@@ -28,11 +29,11 @@ function tree_image($options=array()){
 	}else{
 		$Tree_ID=tree_build_path(ltrim($src,'/'));
 	}
-	if(!$mode)$mode='output';
+	if(empty($mode)) $mode='output';
 	if($mode=='output'){
-		if(!$disposition)global $disposition;
-		if(!$boxMethod)global $boxMethod;
-		if($disposition)$d=explode('x',$disposition);
+		if(empty($disposition)) global $disposition;
+		if(empty($boxMethod)) global $boxMethod;
+		if(!empty($disposition)) $d=explode('x',$disposition);
 		$src='/images/reader.php?Tree_ID='.$Tree_ID.'&Key='.md5($Tree_ID.$MASTER_PASSWORD).($disposition?'&disposition='.$disposition:'').($boxMethod?'&boxMethod='.$boxMethod:'');
 		$str='<img src="'.$src.'"';
 		foreach(array('id','class','style','onclick','onmouseover','onmouseout','ondblclick','ondragdrop','onhover') as $v){
@@ -46,6 +47,7 @@ function tree_image($options=array()){
 	}
 	return array('Tree_ID'=>$Tree_ID, 'disposition'=>$disposition,'src'=>$src);
 }
+
 $functionVersions['tree_id_to_path']=1.00;
 function tree_id_to_path($n,$options=array()){
     /*
@@ -64,6 +66,7 @@ function tree_id_to_path($n,$options=array()){
     if($row['Type']=='file') $tree_id_to_path=$row;
     return ($row ? tree_id_to_path($row['Tree_ID'],$options).'/'.$row['Name'] : '');
 }
+
 function tree_path_to_id($n){
 	//normal string passage would be images/assets/spacer.gif OR /images/assets/spacer.gif - the left / is removed
 	global $tree_path_to_id, $qr;
@@ -81,6 +84,7 @@ function tree_path_to_id($n){
 	}
 	return $result['ID'];
 }
+
 function tree_build_path($n,$options=array()){
 	/*
 	2011-3-4 added option defaultTable
@@ -117,6 +121,7 @@ function tree_build_path($n,$options=array()){
 	}
 	return $Tree_ID;
 }
+
 function tree_delete_children($n,$options=array()){
 	//Weird Variable Name because I don't want to step on anything else because it is just a counter
 	//Couldn't find another way around needing the initial ID, there is no other way to re-call the function and still have it delete everything
@@ -167,5 +172,3 @@ function tree_delete_children($n,$options=array()){
 	q("DELETE FROM relatebase_tree WHERE ID='$init_ID'");
 	return(true);
 }
-
-?>

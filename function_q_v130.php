@@ -73,7 +73,8 @@ $qx['defCnxMethodReq']=true;
 if(!isset($qx['defCnxMethod']))$qx['defCnxMethod']='';
 
 //use error remediation function
-if(!isset($qx['useRemediation']))$qx['useRemediation']=false;
+if(!isset($qx['useRemediation']))$qx['useRemediation']=true;
+
 //initially set this to zero, it will be incremented when we attempt to repair a problem, then set zero when problem is repaired (whether successfully or not)
 $qx['remediationStep']=0;
 //remediation function name; if _q[useRemediation] is true, this function will be checked for existence
@@ -107,11 +108,10 @@ function q(){
     version 1.03 -- 2004-11-27 -- added O_RETURN_ASSOC, so if I say SELECT Code, Label FROM values, I'll get back an array of $a[Code1]=Label1, $a[Code2]=Label2, etc.; Also fixed error: if the cnx was passed as an array without a db, the err message wasn't specific
      **/
 
-    global $qx, $qr, $fl, $ln, $cnxString, $qQueryCount, $qtest, $developerEmail, $fromHdrBugs;
+    global $qx, $qr, $fl, $ln, $cnxString, $qQueryCount, $developerEmail, $fromHdrBugs;
 
     //qr is specific to each query; it's cleared out each time
     unset($qr);
-    global $qr;
 
     /**
     developed by Sam Fullman starting 2004-11-17
@@ -136,19 +136,13 @@ function q(){
 
     //we globalize arg list in case we need to use remediation
     $arg_list=func_get_args();
-    if($qx['useRemediation'] && $qx['remediationStep'] && !in_array(O_DO_NOT_REMEDIATE,$arg_list)){
-        //this is a requery of the original after one or more remediation attempts has been made
-        mail($developerEmail, 'Error, calling q in remediation mode, '.__FILE__.', line '.__LINE__,get_globals(),$fromHdrBugs);
-        echo '<strong>Calling q() in remediation mode line '.__LINE__.', here are the args:</strong><br />';
-        prn($arg_list);
-        //OK
-    }
 
-    $knownConst=array(1,2,3,4,20,21,22,23,40,41,42,43,44,45,100,101,103,104,105,106,107,108,109,110,111,115,116,200,900,901,902); //this prevents passing constants from an older version to the function
+    //this prevents passing constants from an older version to the function
+    $knownConst=array(1,2,3,4,20,21,22,23,40,41,42,43,44,45,100,101,103,104,105,106,107,108,109,110,111,115,116,200,900,901,902);
     for($i=0; $i < count($arg_list); $i++){
 
         if(@preg_match('/^(O_|ERR_|C_|E_)[A-Z_]+$/',$arg_list[$i]) || (is_int($arg_list[$i]) && !@in_array($arg_list[$i],$knownConst))){
-            exit('Attempting to call function q() with an unrecognized or outdated constant or integer: '.$arg_list[$i]);
+            exit('Attempting to call q() with an unrecognized or outdated constant or integer: '.$arg_list[$i]);
         }
         //rule is, connections are arrays, queries are strings, and flags are constants
         switch(true){
@@ -189,12 +183,22 @@ function q(){
         }
     }
 
+    if($qx['useRemediation'] && $qx['remediationStep'] && !in_array(O_DO_NOT_REMEDIATE,$arg_list)){
+        //this is a requery of the original after one or more remediation attempts has been made
+        mail($developerEmail, 'Error, calling q in remediation mode, '.__FILE__.', line '.__LINE__,get_globals(),$fromHdrBugs);
+        echo '<strong>Calling q() in remediation mode line '.__LINE__.', here are the args:</strong><br />';
+        prn($arg_list);
+        //OK
+    }
+
     $qQueryCount++;
     $qr['idx']=$qQueryCount;
     $qr['file']=(!empty($fl) ? $fl : 'UNKNOWN');
     $qr['line']=(!empty($_ln_) ? $_ln_*10000 : (!empty($ln) ? $ln : 'UNKNOWN'));
 
-    if(!empty($qTesting)) prn($arg_list);
+    if(!empty($qTesting)) {
+        prn($arg_list);
+    }
     //get the query and default values
     $cc = !empty($_SESSION['currentConnection']) ? $_SESSION['currentConnection'] : '';
     $cu = !empty($_SESSION['cnx'][$cc]['userName']) ? $_SESSION['cnx'][$cc]['userName'] : '';
@@ -222,16 +226,19 @@ function q(){
             //OK
             #2. required but not present, fail
         }else if($qx['defCnxMethodReq']){
-            exit('In function q(), a default connection method is required and has not been passed');
+            exit('In q(), a default connection method is required and has not been passed');
             #3. this is a RelateBase convention and can be removed.  Won't get to here as long as defCnxMethodReq=true
         }else{
             $cnx=C_DEFAULT;
         }
     }
+
     if(!empty($qTestingCnx)){
+        prn('q testing cnx at line '.__LINE__);
         prn('cnx:');
         prn($cnx);
     }
+
     //set up parameters for connection
     switch($switch = true){
         case is_array($cnx):
@@ -282,10 +289,20 @@ function q(){
             $problem2=E_BAD_RB_CNX;
             break;
         default:
-            exit('Function q() cannot determine a connection method');
+            exit('q() cannot determine a connection method');
     } //-- end connection handling
+
     //connect and select database
     global $$cnxString;
+
+
+    if($qTesting){
+        prn('q testing at line '.__LINE__);
+        prn("I think I will use: $host:$user:$pass:$db");
+        prn("single-dollar cnxString = ".$cnxString);
+        prn($$cnxString);
+    }
+
     if(!empty($qTestingCnx)) echo '<br />connection: ('.$cnxString.') '.($$cnxString ? $$cnxString : 'not established');
     if(!$$cnxString){
         if(!$host || !$user){
@@ -318,7 +335,11 @@ function q(){
         return $$cnxString;
     }
 
-    if($qTesting) prn("db is $db");
+    if($qTesting){
+        prn('q testing at line '.__LINE__);
+        prn("db is $db, explicitDb is $explicitDB, and sql is:");
+        prn($sql);
+    }
 
     //explicit connect to passed database parameter
     if(!empty($explicitDB)){
@@ -337,12 +358,22 @@ function q(){
     $qr['result']=$result;
     $qr['time']=round($sec1+$usec1-$sec0-$usec0,6);
 
-    //added 2012-05-06
-    if($qx['slowQueryThreshold'] && $qr['time']>$qx['slowQueryThreshold']){
+    if($qTesting){
+        prn('q testing at line '.__LINE__);
+        prn('error (if any): '.mysqli_error($$cnxString));
+    }
+
+
+    if(!empty($qx['slowQueryThreshold']) && $qr['time']>$qx['slowQueryThreshold']){
         $f=$qx['slowQueryFunction'];
         $f($arg_list);
     }
-    if(!empty($qTesting)) prn($result);
+    if(!empty($qTesting)){
+        prn('q testing at line '.__LINE__);
+        prn('result:');
+        prn($result);
+        exit;
+    }
     if(mysqli_error($$cnxString)){
         if($qTesting)prn(mysqli_errno($$cnxString) . ' : '.mysqli_error($$cnxString));
         //here is the actual failed query section
@@ -463,6 +494,12 @@ function q(){
     if(isset($r))return $r;
 }
 
+
+
+
+
+
+
 function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $queryPassType){
     /**
     Error handling sub-routine
@@ -487,6 +524,7 @@ function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $
             //this will now continue through to the default error method
         }else{
             //run remediation
+            exit('no more remediation! '.__LINE__);
             if(r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $queryPassType)){
                 echo 'success calling q in remediation mode<br />';
                 echo 'useremed = '.$qx['useRemediation'] . '<br />';
@@ -585,11 +623,17 @@ function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $
     }
 }
 function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $queryPassType){
+    $a = func_get_args();
+    prn($a);
+    exit;
     global $tiredOfThis;
     $tiredOfThis++;
     $temp=func_get_args();
     prn('--- calling r(), args ---');
     prn($temp);
+
+    return false;
+
 
     if($tiredOfThis>30)exit('game over');
     /** Remediation function :-) first started in earnest 2005-01-14: this function will analyze the error and see of the problem can be addressed.  It will also eventually log the errors, whether they were fixed or not, etc.. R() is going to return true if it thinks it's solved the problem - q() will be called again - or false if it thinks the problem cannot be solved
@@ -732,7 +776,7 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
         if(count($a)>1)$tableAlias=$a[count($a)-2];
         //get tables
         if($qx['tableList']){
-            //this is a very clumsy method and hand-coded in light of function sql_query_parser()
+            //this is a very clumsy method and hand-coded in light of sql_query_parser()
             foreach($qx['tableList'] as $table=>$db){
 
                 $db='relatebase_template';
@@ -839,4 +883,3 @@ function r_notify(){
     $msg=('a query problem was not able to be remediated');
     mail($developerEmail, 'error file '.__FILE__.', line '.__LINE__,get_globals($msg),$fromHdrBugs);
 }
-?>

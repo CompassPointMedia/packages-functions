@@ -11,12 +11,8 @@ function sql_insert_update_generic($db, $table, $mode, $options=array()){
     $sql_insert_update_generic,
     $dateStamp,
     $timeStamp,
-    $qr,
-    $qx,
     $fl,
-    $ln,
-    $developerEmail,
-    $fromHdrBugs;
+    $ln;
 	unset(
 	    $sql_insert_update_generic['failList'],
         $sql_insert_update_generic['dataintegrity'],
@@ -24,7 +20,7 @@ function sql_insert_update_generic($db, $table, $mode, $options=array()){
         $sql_insert_update_generic['where']
     );
 	if(empty($fl)) $fl=__FILE__;
-	/***
+	/*
 	2012-06-08: added for mysql:function() not being quoted 
 	2012-01-28: changed setCtrlFields as default=true
 	2011-01-06: added logical field analysis; function will determine if the data will make it into the table and normalize it
@@ -84,8 +80,10 @@ function sql_insert_update_generic($db, $table, $mode, $options=array()){
 	if($resource!=='GLOBALS')eval( 'global $'.$resource.';' );
 
 	$ln=__LINE__+1;
-	if(!$sql_insert_update_generic['prop'][$db][$table])
-		$a=$sql_insert_update_generic['prop'][$db][$table]=q('EXPLAIN `'.$db.'`.`'.$table.'`',O_ARRAY, $cnx);
+	if(!$sql_insert_update_generic['prop'][$db][$table]) {
+	    $sql = 'EXPLAIN `'.$db.'`.`'.$table.'`';
+        $sql_insert_update_generic['prop'][$db][$table] = q($sql, O_ARRAY, O_DO_NOT_REMEDIATE, $cnx);
+    }
 
 	foreach($sql_insert_update_generic['prop'][$db][$table] as $v){
 		$f=$v['Field'];
