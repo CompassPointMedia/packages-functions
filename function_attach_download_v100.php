@@ -48,7 +48,7 @@ function attach_download($file='', $string='', $nameAs='', $type='', $options=ar
 		ob_end_clean();
 		unset($fp);
 		!$string?$attach_download['err']='Unable to open specified file, or zero length':'';
-		!$string?mail('samuelf@compasspoint-sw.com','Failed to open file (function attach_download())','function_attach_download','From: form@compasspoint-sw.com'):'';
+		!$string?mail('sam-git@samuelfullman.com','Failed to open file (function attach_download())','function_attach_download','From: reroute@compasspoint-sw.com'):'';
 	}else if($string){
 		$stream=$string;
 		$fileSize=strlen($stream);

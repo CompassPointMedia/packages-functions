@@ -4,7 +4,7 @@ function sql_autoinc_text($table, $field, $root, $where='', $pad=0, $cnx='', $le
 	//2007-01-23: switched over to q() for the query and can now pass the connection
 	//note the pad value, if 3, would produce 001, 002, 003, 004, 005, etc.  Numbers above 999 would still increment normally however
 	if(!$cnx){
-		mail('samuelf@compasspoint-sw.com','autoinc failure file: '.__FILE__.', line: '.__LINE__,'fix it','From: bugreports@compasspoint-sw.com');
+		mail('sam-git@samuelfullman.com','autoinc failure file: '.__FILE__.', line: '.__LINE__,'fix it','From: bugreports@compasspoint-sw.com');
 		global $db_cnx;
 		if($db_cnx){
 			$cnx=$db_cnx;

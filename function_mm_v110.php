@@ -194,7 +194,7 @@ if(false)mm(array(
 	)
 ));
 /*
-next example just picks one and does a jasonp wrap
+next example just picks one and does a jsonp wrap
 */
 if(false)mm(array(
 	'sections'=>array(
