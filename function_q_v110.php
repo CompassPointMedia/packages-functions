@@ -327,7 +327,7 @@ function sub_e($err,$type,$queryPassType='',$system_err='',$q=''){
 			//problem was not remediated, unset, send me an email about the problem
 			unset($qx['arg_list']);
 			if(!function_exists('r_notify')){
-				mail($qAdminEmail,'r_notify function not present',implode("\n",array($GLOBALS['PHP_SELF'], $fl, $ln)),'From: bugreports@compasspoint-sw.com');
+				mail($qAdminEmail,'r_notify function not present',implode("\n",array($_SERVER['PHP_SELF'], $fl, $ln)),'From: bugreports@compasspoint-sw.com');
 			}else{
 				r_notify($qr,$qx);
 			}
