@@ -1,16 +1,30 @@
 <?php
 $functionVersions['CSS_parser']='1.0';
 function CSS_parser($str){
-	/*
+    /**
+     * If we were to parse a media query also, the heirarchy on a "proper" CSS page with no //comments like this, would be:
+     *  - inside single or double quotes, with quotes themselves escaped by ??
+     *  - inside /* comments * /
+     *  - inside media query declarations
+     *  - inside declaration blocks
+     *
+     *
 	2011-08-16 - first used on cpm024 Juliet to parse css decs and separate out.
 	does not handle @media=screen{ .. } overwrap and would fail in this..
 	*/
 	global $CSS_parser;
-	if(!$CSS_parser['retain_global'])$CSS_parser=array();
+	if(empty($CSS_parser['retain_global']))$CSS_parser=array();
+
+	$buffer = '';
+	$escLevel = 0;
+	$char = '';
+	$start = 0;
+
 	for($i=0; $i<strlen($str); $i++){
 		$cp=$str{$i-1};
 		$c=$str{$i};
-		$cn=$str{$i+1};
+		// $cn=$str{$i+1};
+
 		if($escLevel==2){
 			if($cp=='*' && $c=='/'){
 				//buffer
@@ -23,7 +37,7 @@ function CSS_parser($str){
 				$escapes[]=array($start,$i,$buffer,$rand);
 				//substr_replace($str,....);
 				$buffer='';
-				$escLevel='';
+				$escLevel = 0;
 			}else{
 				$buffer.=$c;
 			}
@@ -80,4 +94,3 @@ CSS_parser($str);
 exit;
 */
 
-?>
