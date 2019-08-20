@@ -12,7 +12,7 @@ function what_happened(){
 
 	$cnx=array( $MASTER_HOSTNAME, $MASTER_USERNAME, $MASTER_PASSWORD, $MASTER_DATABASE );
 
-	if(!function_exists('q')) require($_SERVER['DOCUMENT_ROOT'] . '/functions/function_q_v130.php');
+	if(!function_exists('q')) require($_SERVER['DOCUMENT_ROOT'] . '/functions/function_q_v140.php');
 	ob_start();
 	print_r($GLOBALS);
 	$out=ob_get_contents();
