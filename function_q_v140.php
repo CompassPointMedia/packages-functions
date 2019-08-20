@@ -102,7 +102,7 @@ function q(){
     version 1.11 -- 2009-05-31 -- fixed stupid error where mysqli_select_db was not connecting to explicitDB when present
     version 1.10 -- 2006-01-14 -- started remediation in earnest - simple problems like missing fields can be looked up.  Idea is that I can figure out where the table came from by a libary of defs and do the repair.
     version 1.06 -- 2005-10-12 -- reviewed and verified passage of a cnx via an array
-    also unset qr.output and qr.cols so that 
+    also unset qr.output and qr.cols so that
     version 1.05 -- 2004-12-19 -- Remediation added and constant names have been shortened.
     version 1.04 -- 2004-12-06 -- O_EXTRACT_SINGLE now returns true if recordset, false if not (and does not extract).  First used on WIDI console, more to follow on this version number.
     version 1.03 -- 2004-11-27 -- added O_RETURN_ASSOC, so if I say SELECT Code, Label FROM values, I'll get back an array of $a[Code1]=Label1, $a[Code2]=Label2, etc.; Also fixed error: if the cnx was passed as an array without a db, the err message wasn't specific
@@ -112,6 +112,12 @@ function q(){
 
     //qr is specific to each query; it's cleared out each time
     unset($qr);
+
+    $qTesting = false;
+    $qTestingCnx = false;
+    $qDoNotRemediate = false;
+    $info = null;
+    $out = null;
 
     /**
     developed by Sam Fullman starting 2004-11-17
@@ -154,9 +160,9 @@ function q(){
                 //constants
                 switch(true){
                     case ($arg_list[$i]>899):
-                        $arg_list[$i]==900 ? $qTesting=true : '';
-                        $arg_list[$i]==901 ? $qTestingCnx=true : '';
-                        $arg_list[$i]==902 ? $qDoNotRemediate=true : '';
+                        $arg_list[$i]==900 ? $qTesting = true : '';
+                        $arg_list[$i]==901 ? $qTestingCnx = true : '';
+                        $arg_list[$i]==902 ? $qDoNotRemediate = true : '';
                         break(2);
                     case $arg_list[$i] > 199:
                         $info = $arg_list[$i];
@@ -204,8 +210,7 @@ function q(){
     $cu = !empty($_SESSION['cnx'][$cc]['userName']) ? $_SESSION['cnx'][$cc]['userName'] : '';
     $queryPassType = (func_num_args()>0?'passed':'globally available');
     if(empty($errDieMethod)){
-        if($errDieMethod=$qx['defaultQDieMethod']){
-        }else $errDieMethod=ERR_DIE;
+        $errDieMethod = $qx['defaultQDieMethod'] ? : ERR_DIE;
     }
 
     unset($qr['err']);
@@ -362,17 +367,11 @@ function q(){
         prn('error (if any): '.mysqli_error($$cnxString));
     }
 
-
     if(!empty($qx['slowQueryThreshold']) && $qr['time']>$qx['slowQueryThreshold']){
         $f=$qx['slowQueryFunction'];
         $f($arg_list);
     }
-    if(!empty($qTesting)){
-        prn('q testing at line '.__LINE__);
-        prn('result:');
-        prn($result);
-        exit;
-    }
+
     if(mysqli_error($$cnxString)){
         if($qTesting)prn(mysqli_errno($$cnxString) . ' : '.mysqli_error($$cnxString));
         //here is the actual failed query section
@@ -392,7 +391,7 @@ function q(){
         $qr['count']=mysqli_num_rows($result);
     }else unset($qr['count']);
     //handle output parameters
-    if($out==O_INSERTID){
+    if(!empty($out) && $out == O_INSERTID){
         return $qr['insert_id'];
     }
     //the following operations only apply to a SELECT query
@@ -437,26 +436,29 @@ function q(){
         case $out == O_ARRAY:
         case $out == O_ARRAY_ASSOC:
         case $out == O_ARRAY_APPEND:
-            if($out==O_ARRAY_APPEND){
-                eval('global $'.$qx['merge_array'].'; $x=count($'.$qx['merge_array'].';');
-            }else{
-                $x=0;
+            $x = 0;
+            if($out == O_ARRAY_APPEND && !empty($qx['merge_array']) && !empty($GLOBALS[$qx['merge_array']])){
+                $x = count($GLOBALS[$qx['merge_array']]);
             }
-            while($rd=mysqli_fetch_array($result,MYSQLI_ASSOC)){
+            $a = [];
+            while($rd = mysqli_fetch_array($result,MYSQLI_ASSOC)){
                 $x++;
-                if($x==1){
-                    $y=0;
-                    foreach($rd as $n=>$v){
+                if($x == 1){
+                    $y = 0;
+                    foreach($rd as $n => $v){
                         $y++;
-                        if($y==1)$firstCol=$n;
-                        $qr['cols'][$y]=$n;
+                        if($y == 1)$firstCol = $n;
+                        $qr['cols'][$y] = $n;
                     }
                 }
-                $out==O_ARRAY_ASSOC?$x=$rd[$firstCol]:'';
-                $a[$x]=$rd;
+                $out == O_ARRAY_ASSOC ? $x = $rd[$firstCol] : '';
+                $a[$x] = $rd;
             }
-            if($out!==O_ARRAY_APPEND)$r= $a;
+            if($out !== O_ARRAY_APPEND) $r = $a;
             break;
+        /**
+         * 2019-08-06: Not sure this is used much
+         */
         case $out == O_ARRAY_ASSOC_MULTI:
         case $out == O_ARRAY_ASSOC_2D:
             $x=0;
@@ -503,16 +505,15 @@ function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $
     /**
     Error handling sub-routine
      **/
-    global $fl,$ln,$qx,$qr,$cnxString;
+    global $fl, $ln, $qx, $qr, $cnxString;
     global $$cnxString;
+    $errorStyle = 'background-color:aliceblue; border:1px dashed #CCC;padding: 5px 10px;';
 
     if($qx['useRemediation']) $qx['remediationStep']++;
     /*
-    2009-06-16
-    ----------
-    NOTE: if error is E_NO_SQL_QUERY, we do not use remediation.  Also many functions such as get_table_indexes() are presumed sound and will be needed DURING remediation, so we will pass O_DO_NOT_REMEDIATE in the queries in these functions.
-    
-    
+    2009-06-16 NOTE: if error is E_NO_SQL_QUERY, we do not use remediation.  Also many functions such as get_table_indexes() are presumed sound and will be needed DURING remediation, so we will pass O_DO_NOT_REMEDIATE in the queries in these functions.
+
+
     */
     if($qx['useRemediation'] && !$qDoNotRemediate && $qx['remediationStep']>0 && $type!==E_NO_SQL_QUERY){
         if($qx['remediationStep']>$qx['remediationIts']){
@@ -523,7 +524,6 @@ function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $
             //this will now continue through to the default error method
         }else{
             //run remediation
-            exit('no more remediation! '.__LINE__);
             if(r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $queryPassType)){
                 echo 'success calling q in remediation mode<br />';
                 echo 'useremed = '.$qx['useRemediation'] . '<br />';
@@ -538,13 +538,13 @@ function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $
                 }
                 $str=rtrim($str,',').');';
                 echo 'calling query again:<br />';
-                prn($str);
+                prn($arg_list);
 
-                eval($str);
-                return;
+                //re-call q with original arguments
+                return call_user_func_array('q', $arg_list);
             }else{
                 $qx['remediationStep']=0;
-                #return false; //(? not sure if this should be here - can delete if it works) we're done with error system
+                return false;
             }
         }
     }
@@ -584,12 +584,9 @@ function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $
         case E_BAD_RB_CNX:
             $msg="(Error #{$system_err[0]}) {$system_err[1]}";
             break;
-        case E_QUERY_FAILED;
+
+        default: // E_QUERY_FAILED;
             $msg="Query failed with the following: (Error #{$system_err[0]}) {$system_err[1]}";
-            break;
-        default:
-            $msg="Query failed with the following: (Error #{$system_err[0]}) {$system_err[1]}";
-            break;
     }
     $qr['err']='SQL Error<br />';
     if($fl)$qr['err'].='In file: '.$fl.'<br />';
@@ -600,41 +597,26 @@ function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $
     $qr['system_errno']=$system_err[0];
     //get query
     foreach($arg_list as $v){
-        if(strstr($v,' '))$query=$v;
+        if(strstr($v,' ')){
+            $query = $v;
+        }
     }
-    if($errDieMethod==ERR_DIE){
-        die(
-            '<div class="sqlException" style="background-color:ALICEBLUE;border:1px dashed #CCC;padding 5 10;">'.
-            $qr['err']. '<br />'.
-            '(Query: '.($query ? $query : '[-by qr array]'.$qr['query']).')<br />'.
-            '</div>'
-        );
-    }else if($errDieMethod==ERR_ECHO){
-        echo $qr['err']=
-            '<div class="sqlException" style="background-color:ALICEBLUE;border:1px dashed #CCC;padding 5 10;">'.
-            $qr['err']. '<br />'.
-            '(Query:<br />'.($query ? $query : '[+by qr array]'.$qr['query']).')<br />'.
-            '</div>';
-    }else if($errDieMethod==ERR_SILENT){
+    if($errDieMethod == ERR_SILENT){
         return false;
-    }else if($errDieMethod==ERR_ALERT){
-        error_alert("ERR_ALERT method not developed");
     }
+    $errMessage = '<div class="sqlException" style="' . $errorStyle . '">'.
+        $qr['err']. '<br />'.
+        '(Query: '.($query ? $query : '[-by qr array]'.$qr['query']).')<br />'.
+        '</div>';
+    if($errDieMethod == ERR_ECHO){
+        echo $errMessage;
+        return false;
+    }
+    // ERR_DIE; default
+    die( $errMessage );
 }
+
 function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $queryPassType){
-    $a = func_get_args();
-    prn($a);
-    exit;
-    global $tiredOfThis;
-    $tiredOfThis++;
-    $temp=func_get_args();
-    prn('--- calling r(), args ---');
-    prn($temp);
-
-    return false;
-
-
-    if($tiredOfThis>30)exit('game over');
     /** Remediation function :-) first started in earnest 2005-01-14: this function will analyze the error and see of the problem can be addressed.  It will also eventually log the errors, whether they were fixed or not, etc.. R() is going to return true if it thinks it's solved the problem - q() will be called again - or false if it thinks the problem cannot be solved
     NOTE: make sure the interface has all the functions necessary to do updating including:
     function_rtcs_update_table_mysql_v101.php
@@ -652,21 +634,22 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
 
     Our first job is to determine what db and table(s) are being called. r() will use some new functions to be developed for parsing SQL queries which I don't have yet.
      **/
-    global $fl,$ln,$qx,$qr,$remedTable,$FUNCTION_ROOT, $MASTER_DATABASE, $dbTypeArray, $developerEmail, $fromHdrBugs, $rCalled;
+    global $fl, $ln, $qx, $qr, $remedTable, $FUNCTION_ROOT, $MASTER_DATABASE, $dbTypeArray, $developerEmail, $fromHdrBugs, $rCalled;
     $query=$qr['query'];
 
     //handle connection and database
-    foreach($arg_list as $w) if(($w>0 && $w <20) || is_array($w))$cnx=$w;
-    if(!$cnx)$cnx=$qx['defCnxMethod'];
+    foreach($arg_list as $w) if(($w>0 && $w <20) || is_array($w)) $cnx=$w;
+    if(empty($cnx)) $cnx=$qx['defCnxMethod'];
 
+    $oldCoding = false;
     if($oldCoding){
-        error_alert(x);
         preg_match('/^(INSERT INTO|REPLACE INTO|UPDATE|DELETE FROM)((.|\s)*)/i',$query,$a);
         $action=strtoupper($a[1]);
         if($action =='DELETE FROM') return false;
         prn($action);
         $a=preg_split('/\s+SET\s+/i',$a[2]);
         $tableList=explode(',',trim($a[0]));
+        $i = 0;
         foreach($tableList as $v){
             $i++;
             $t=explode('.',$v);
@@ -674,7 +657,7 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
                 $tables[$i]['db']=$t[0];
                 $tables[$i]['table']=$t[1];
             }else{
-                if(!$db){
+                if(empty($db)){
                     $rsql="SHOW TABLES";
                     $result=mysqli_query($$cnxString, $rsql);
                     $rd=mysqli_fetch_array($result,MYSQLI_ASSOC);
@@ -694,7 +677,7 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
             extract($remedTable[$v['table']]['rootRemed']);
             if(in_array($args[3][0], $triggerErrors) /** and we need to ask if the error came from this table **/){
                 switch(true){
-                    case $stockAction==1000:
+                    case $stockAction == 1000:
                         //synchronize the table
                         #turn off useRemediation bit - allows functions(s) to work normally
                         $qx['useRemediation']=false;
@@ -720,7 +703,7 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
         }
     }
 
-    if(!$rCalled && false){
+    if(!$rCalled){
         $rCalled=true;
         ?><div style="border:1px solid #000;padding:20px; background-color:#FFAAAA;">
             <div class="fr" style="padding:0px 15px 15px 0px;"><img src="/images/i/alert01.gif" alt="Notice" /></div>
@@ -731,32 +714,33 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
             <div style="clear:both;">&nbsp;</div>
         </div><?php
     }
-    if($system_err[0]==1146){
+    $args = func_get_args();
+    prn($args);
+    if($system_err[0] == 1146){
         //----- table doesn't exist --------
         $str=$system_err[1];
-        if(!preg_match("#table '([^.]+)\.([^.]+)' doesn\'t exist#i",$str,$dbTable)){
+        if(!preg_match("#table '([^.]+)\.([^.]+)' doesn\'t exist#i", $str, $dbTable)){
             mail($developerEmail, 'error file '.__FILE__.', line '.__LINE__,get_globals(),$fromHdrBugs);
             return false;
         }
-        $createtable=q("SHOW CREATE TABLE relatebase_template.".$dbTable[2], O_ROW, C_SUPER, O_DO_NOT_REMEDIATE);
-        if($createtable['Create View']){
-            $creating='Create View';
-            if(!preg_match('/VIEW `([-_a-z0-9]+)`\.`([-_a-z0-9]+)` AS/i',$createtable['Create View'],$a)){
+        $createTable=q("SHOW CREATE TABLE relatebase_template.".$dbTable[2], O_ROW, C_SUPER, O_DO_NOT_REMEDIATE);
+        if(!empty($createTable['Create View'])){
+            if(!preg_match('/VIEW `([-_a-z0-9]+)`\.`([-_a-z0-9]+)` AS/i',$createTable['Create View'],$a)){
                 mail($developerEmail, 'error file '.__FILE__.', line '.__LINE__,get_globals(),$fromHdrBugs);
                 return false;
             }
-            $createtable=str_replace($a[0],'VIEW `'.$MASTER_DATABASE.'`.`'.$a[2].'` AS',$createtable['Create View']);
-            $createtable=str_replace('`relatebase_template`.','`'.$MASTER_DATABASE.'`.',$createtable);
-            $createtable=preg_replace('/DEFINER=`[-_a-z0-9]+`@`[-_a-z0-9]+`/i','DEFINER=`'.$MASTER_DATABASE.'`@`localhost`',$createtable);
+            $createTable=str_replace($a[0],'VIEW `'.$MASTER_DATABASE.'`.`'.$a[2].'` AS',$createTable['Create View']);
+            $createTable=str_replace('`relatebase_template`.','`'.$MASTER_DATABASE.'`.',$createTable);
+            $createTable=preg_replace('/DEFINER=`[-_a-z0-9]+`@`[-_a-z0-9]+`/i','DEFINER=`'.$MASTER_DATABASE.'`@`localhost`',$createTable);
         }else{
-            $creating='Create Table';
-            $createtable=str_replace("CREATE TABLE `", "CREATE TABLE $MASTER_DATABASE.`",$createtable['Create Table']);
+            $createTable=str_replace("CREATE TABLE `", "CREATE TABLE $MASTER_DATABASE.`",$createTable['Create Table']);
         }
         ob_start();
-        q($createtable, O_DO_NOT_REMEDIATE, /*ERR_ECHO, */C_SUPER);
+        q($createTable, O_DO_NOT_REMEDIATE, C_SUPER);
         $err=ob_get_contents();
         ob_end_clean();
         if($err){
+            exit($err);
             mail($developerEmail, 'error file '.__FILE__.', line '.__LINE__,get_globals(),$fromHdrBugs);
             return false;
         }
@@ -771,17 +755,15 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
         $unknownColumn=$unknownColumn[1];
         $a=explode('.',$unknownColumn);
         $unknownColumn=end($a);
-        #prn("looking for $unknownColumn");
-        if(count($a)>1)$tableAlias=$a[count($a)-2];
+
         //get tables
-        if($qx['tableList']){
+        if(false && !empty($qx['tableList'])){
             //this is a very clumsy method and hand-coded in light of sql_query_parser()
-            foreach($qx['tableList'] as $table=>$db){
+            foreach($qx['tableList'] as $table){
 
                 $db='relatebase_template';
                 $fieldList=mysql_declare_table_rtcs($db,$table,false,$options=array('cnx'=>C_SUPER));
                 $targetFieldList=mysql_declare_table_rtcs('',$table,false,$options=array('cnx'=>$cnx));
-
 
                 prn("------------- table $table ---------");
                 //get field list - NOTE this will add the field from the first table present
@@ -794,7 +776,7 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
                 foreach($fieldList['fields'] as $field=>$v){
                     //prn($field . ':' . $unknownColumn);
                     if($field==strtolower($unknownColumn)){
-                        //insert the field - the original 
+                        //insert the field - the original
                         //get a function
                         if(!function_exists('rtcs_declare_field_attributes_mysql'))
                             require($FUNCTION_ROOT.'/function_rtcs_declare_field_attributes_mysql_v200.php');
@@ -810,8 +792,10 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
             }
             return false;
         }else{
-            if(!function_exists('sql_query_parser'))require($FUNCTION_ROOT.'/function_sql_query_parser_v100.php');
+            if(!function_exists('sql_query_parser')) require($FUNCTION_ROOT.'/function_sql_query_parser_v100.php');
+            $query = $arg_list[2][0]; // Let's assume the query is the first thing in q(), it always has been..
             if($a=sql_query_parser($query)){
+                prn($a,1);
                 $db=($qx['rTemplateDatabase'] ? $qx['rTemplateDatabase'] : 'relatebase_template');
                 foreach(q("SHOW TABLES IN $db", O_ARRAY, O_DO_NOT_REMEDIATE, C_SUPER) as $v)$tables[]=$v['Tables_in_'.$db];
                 $possibleTables=preg_split('/\s+/',trim($a['from']));
@@ -821,7 +805,7 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
                     $targetFieldList=mysql_declare_table_rtcs('',$table,false,$options=array('cnx'=>$cnx));
                     foreach($fieldList['fields'] as $field=>$v){
                         if($field==strtolower($unknownColumn)){
-                            //insert the field - the original 
+                            //insert the field - the original
                             require_once($FUNCTION_ROOT.'/function_rtcs_declare_field_attributes_mysql_v200.php');
                             $str="ALTER TABLE $MASTER_DATABASE.$table ADD ";
                             $str.=rtcs_declare_field_attributes_mysql($v);

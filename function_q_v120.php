@@ -258,7 +258,6 @@ function q(){
 			$host=$_SESSION['cnx'][$cc]['hostName'];
 			$user=$_SESSION['cnx'][$cc]['userName'];
 			$pass=$_SESSION['cnx'][$cc]['password'];
-			if($cnx==C_DEFAULT_GENERIC)$pass=generic5t($pass,'decode');
 			!strlen($db)?$db=$cc:'';
 			$cnxString='db_cnx';
 			$problem=E_NO_DB_CNX_VARS;

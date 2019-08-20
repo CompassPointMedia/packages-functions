@@ -84,7 +84,7 @@ function form_field_presenter($options=array()){
 		if(count($recordPKField)<>1)exit('table has a compound or missing primary key');
 		if(!$sorter)$sorter=$recordPKField[0];
 	}
-	$mid=(strstr($mode,'update')?'um':'im');
+	$cartModuleId=(strstr($mode,'update')?'um':'im');
 
 	if(!$usedAttributes)$usedAttributes=array('id','class','style','onclick','onchange','value','rows','cols','cbtable');
 	if($suppress['relations']){
@@ -192,7 +192,7 @@ function form_field_presenter($options=array()){
 		if(count($col['attributes']))
 		foreach($col['attributes'] as $o=>$w)$possibleAttributes[]=strtolower(current(explode(':',$o)));
 		if(count($possibleAttributes))
-		foreach($possibleAttributes as $w)$_attrib_[$w]=(isset($col['attributes'][$w.':'.$mid]) ? $col['attributes'][$w.':'.$mid] : $col['attributes'][$w]);
+		foreach($possibleAttributes as $w)$_attrib_[$w]=(isset($col['attributes'][$w.':'.$cartModuleId]) ? $col['attributes'][$w.':'.$cartModuleId] : $col['attributes'][$w]);
 		$output=array();
 		
 		/* special cases:
@@ -326,7 +326,7 @@ function form_field_presenter($options=array()){
 				<option value="<?php
 					//added 2012-12-10: if the table field is default null, we want to pass a null value
 					if($Null=='YES' && is_null($Default))echo 'PHP:NULL';
-					?>"<?php if($mid!='im')echo ' class="gray" style="font-style:italic;"';?>><?php if($mid=='im'){ ?>&lt;Select..&gt;<?php }else{ ?>(none)<?php } ?></option><?php 
+					?>"<?php if($cartModuleId!='im')echo ' class="gray" style="font-style:italic;"';?>><?php if($cartModuleId=='im'){ ?>&lt;Select..&gt;<?php }else{ ?>(none)<?php } ?></option><?php
 				if(!empty($_opt_))
 				foreach($_opt_ as $o=>$w){
 					?><option value="<?php echo $o;?>" <?php echo $o==$value?'selected':''?>><?php echo $w;?></option><?php
