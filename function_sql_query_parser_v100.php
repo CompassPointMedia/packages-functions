@@ -9,7 +9,6 @@ function sql_query_parser($query){
 	$i=0;
 	foreach($parseWords as $word){
 		$i++;
-		#prn('splitting by '.$word);
 		$a=preg_split('/\b'.$word.'\b/i',$query);
 		#prn($a);
 		//echo '<br /><br />';

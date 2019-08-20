@@ -367,17 +367,11 @@ function q(){
         prn('error (if any): '.mysqli_error($$cnxString));
     }
 
-
     if(!empty($qx['slowQueryThreshold']) && $qr['time']>$qx['slowQueryThreshold']){
         $f=$qx['slowQueryFunction'];
         $f($arg_list);
     }
-    if(!empty($qTesting)){
-        prn('q testing at line '.__LINE__);
-        prn('result:');
-        prn($result);
-        exit;
-    }
+
     if(mysqli_error($$cnxString)){
         if($qTesting)prn(mysqli_errno($$cnxString) . ' : '.mysqli_error($$cnxString));
         //here is the actual failed query section
@@ -549,9 +543,8 @@ function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $
                 //re-call q with original arguments
                 return call_user_func_array('q', $arg_list);
             }else{
-                exit('figured it');
                 $qx['remediationStep']=0;
-                #return false; //(? not sure if this should be here - can delete if it works) we're done with error system
+                return false;
             }
         }
     }
@@ -624,21 +617,6 @@ function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $
 }
 
 function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $queryPassType){
-    /*
-    $a = func_get_args();
-    prn($a);
-    exit;
-    global $tiredOfThis;
-    $tiredOfThis++;
-    $temp=func_get_args();
-    prn('--- calling r(), args ---');
-    prn($temp);
-
-    return false;
-
-
-    if($tiredOfThis>30)exit('game over');
-    */
     /** Remediation function :-) first started in earnest 2005-01-14: this function will analyze the error and see of the problem can be addressed.  It will also eventually log the errors, whether they were fixed or not, etc.. R() is going to return true if it thinks it's solved the problem - q() will be called again - or false if it thinks the problem cannot be solved
     NOTE: make sure the interface has all the functions necessary to do updating including:
     function_rtcs_update_table_mysql_v101.php
@@ -736,10 +714,12 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
             <div style="clear:both;">&nbsp;</div>
         </div><?php
     }
+    $args = func_get_args();
+    prn($args);
     if($system_err[0] == 1146){
         //----- table doesn't exist --------
         $str=$system_err[1];
-        if(!preg_match("#table '([^.]+)\.([^.]+)' doesn\'t exist#i",$str,$dbTable)){
+        if(!preg_match("#table '([^.]+)\.([^.]+)' doesn\'t exist#i", $str, $dbTable)){
             mail($developerEmail, 'error file '.__FILE__.', line '.__LINE__,get_globals(),$fromHdrBugs);
             return false;
         }
@@ -775,17 +755,15 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
         $unknownColumn=$unknownColumn[1];
         $a=explode('.',$unknownColumn);
         $unknownColumn=end($a);
-        #prn("looking for $unknownColumn");
-        if(count($a)>1)$tableAlias=$a[count($a)-2];
+
         //get tables
-        if($qx['tableList']){
+        if(false && !empty($qx['tableList'])){
             //this is a very clumsy method and hand-coded in light of sql_query_parser()
-            foreach($qx['tableList'] as $table=>$db){
+            foreach($qx['tableList'] as $table){
 
                 $db='relatebase_template';
                 $fieldList=mysql_declare_table_rtcs($db,$table,false,$options=array('cnx'=>C_SUPER));
                 $targetFieldList=mysql_declare_table_rtcs('',$table,false,$options=array('cnx'=>$cnx));
-
 
                 prn("------------- table $table ---------");
                 //get field list - NOTE this will add the field from the first table present
@@ -814,8 +792,10 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate, $quer
             }
             return false;
         }else{
-            if(!function_exists('sql_query_parser'))require($FUNCTION_ROOT.'/function_sql_query_parser_v100.php');
+            if(!function_exists('sql_query_parser')) require($FUNCTION_ROOT.'/function_sql_query_parser_v100.php');
+            $query = $arg_list[2][0]; // Let's assume the query is the first thing in q(), it always has been..
             if($a=sql_query_parser($query)){
+                prn($a,1);
                 $db=($qx['rTemplateDatabase'] ? $qx['rTemplateDatabase'] : 'relatebase_template');
                 foreach(q("SHOW TABLES IN $db", O_ARRAY, O_DO_NOT_REMEDIATE, C_SUPER) as $v)$tables[]=$v['Tables_in_'.$db];
                 $possibleTables=preg_split('/\s+/',trim($a['from']));

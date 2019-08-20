@@ -82,7 +82,7 @@ function sql_insert_update_generic($db, $table, $mode, $options=array()){
 	$ln=__LINE__+1;
 	if(!$sql_insert_update_generic['prop'][$db][$table]) {
 	    $sql = 'EXPLAIN `'.$db.'`.`'.$table.'`';
-        $sql_insert_update_generic['prop'][$db][$table] = q($sql, O_ARRAY, O_DO_NOT_REMEDIATE, $cnx);
+        $sql_insert_update_generic['prop'][$db][$table] = q($sql, O_ARRAY, $cnx);
     }
 
 	foreach($sql_insert_update_generic['prop'][$db][$table] as $v){
