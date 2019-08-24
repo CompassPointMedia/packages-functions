@@ -28,7 +28,7 @@ function q_tools($options = []){
 	if(!isset($cnx)) $cnx=$qx['defCnxMethod'];
 	if(empty($mode)) return false;
 	if(empty($submode)) $submode = '';
-	if(!isset($return)) $return = '';
+	if(!isset($return)) $return = 'change';
 	if(!isset($refresh)) $refresh = false;
 	if(empty($table)) return false;
 	if(empty($command)) $command = '';
@@ -38,7 +38,13 @@ function q_tools($options = []){
 
 	if($mode=='table_exists'){
 		//previously processed
-		if($a=$q_tools['data'][$acct][$table] && !$refresh) return ($return=='data' ? $a : true);
+		if(!empty($q_tools['data'][$acct][$table]) && !$refresh){
+		    if($return === 'data'){
+		        return $q_tools['data'][$acct][$table];
+            }else if($return === 'change'){
+		        return false;
+            }
+        }
 
         ob_start();
 		$qx['useRemediation']=$create;
