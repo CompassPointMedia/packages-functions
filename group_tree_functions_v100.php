@@ -97,16 +97,18 @@ function tree_build_path($n,$options=array()){
 	*/
 	$a=explode('/',trim($n,'/'));
 	extract($options);
-	if(!$defaultTable)$defaultTable='relatebase_tree';
+	if(empty($defaultTable)) $defaultTable='relatebase_tree';
 	if(!isset($Tree_ID))$Tree_ID=NULL;
-	if(count($lastNodeValues)){
+	if(!empty($lastNodeValues)){
+	    $str = '';
 		foreach($lastNodeValues as $n=>$v){
 			$str.=$n."='".addslashes($v)."',\n";
 		}
 	}
+	$i = 0;
 	foreach($a as $n=>$v){
 		$i++;
-		if($o=q("SELECT ID FROM ".$defaultTable." WHERE Tree_ID".(is_null($Tree_ID)?' IS NULL':'='.$Tree_ID)." AND Name='".addslashes($v)."' AND Type='".($lastNodeType && $i==count($a) ? $lastNodeType : 'folder')."'", O_VALUE)){
+		if($o=q("SELECT ID FROM ".$defaultTable." WHERE Tree_ID".(is_null($Tree_ID)?' IS NULL':'='.$Tree_ID)." AND Name='".addslashes($v)."' AND Type='".(!empty($lastNodeType) && $i==count($a) ? $lastNodeType : 'folder')."'", O_VALUE)){
 			//OK
 			$Tree_ID=$o;
 		}else{
@@ -116,7 +118,7 @@ function tree_build_path($n,$options=array()){
 			Type='".($lastNodeType && $i==count($a) ? $lastNodeType : 'folder')."', 
 			Name='".addslashes($v)."', 
 			CreateDate=NOW(), 
-			Creator='".($Creator ? $Creator : ($_SESSION['systemUserName'] ? $_SESSION['systemUserName'] : 'system'))."'", O_INSERTID);
+			Creator='".(!empty($Creator) ? $Creator : ($_SESSION['systemUserName'] ? $_SESSION['systemUserName'] : 'system'))."'", O_INSERTID);
 		}
 	}
 	return $Tree_ID;
