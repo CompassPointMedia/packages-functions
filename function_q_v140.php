@@ -676,8 +676,10 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate){
 
         $createTable = str_replace('{RB_ACCTNAME}', $acct, $createTable);
 
+        $createTable = preg_replace('/ALGORITHM=UNDEFINED DEFINER.+SQL SECURITY DEFINER VIEW/', 'OR REPLACE VIEW', $createTable);
+
         ob_start();
-        q($createTable, O_DO_NOT_REMEDIATE, C_SUPER);
+        q($createTable, /* O_DO_NOT_REMEDIATE, - removed this so a view creation which depents on another table can get the table for example - but it is rather scary.. worked with _v_staff_master_information, created all the underlying tables, about 5 of them. */ C_SUPER);
         $err=ob_get_contents();
         ob_end_clean();
 
