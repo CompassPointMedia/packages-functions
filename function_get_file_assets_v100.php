@@ -20,8 +20,10 @@ function get_file_assets($folder, $options=array()){
 	***/
 	global $get_file_assets;
 	@extract($options);
-	if(strlen($positiveFilters) && !is_array($positiveFilters))$positiveFilters=array($positiveFilters);
-	if(strlen($negativeFilters) && !is_array($negativeFilters))$negativeFilters=array($negativeFilters);
+	if(empty($positiveFilters)) $positiveFilters = [];
+	if(empty($negativeFilters)) $negativeFilters = [];
+	if(!empty($positiveFilters) && !is_array($positiveFilters)) $positiveFilters=array($positiveFilters);
+	if(!empty($negativeFilters) && !is_array($negativeFilters)) $negativeFilters=array($negativeFilters);
 	
 	if(!is_dir($folder)){
 		$get_file_assets['err']='No such folder';
@@ -80,4 +82,3 @@ function get_file_assets($folder, $options=array()){
 	}
 	return $files;
 }
-?>

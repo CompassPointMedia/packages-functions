@@ -202,10 +202,10 @@ function CMSB($section='', $method='', $options=array()){
 		$depth=trim($a[2],'()');
 		$section=$a[3];
 	}
-	if(!$cnx)$cnx=$qx['defCnxMethod'];
+	if(empty($cnx))$cnx=$qx['defCnxMethod'];
 	
 	//convert html extensions to php
-	if($CMSBx['rewriteHTMLExtensions']){
+	if(!empty($CMSBx['rewriteHTMLExtensions'])){
 		($thispage=preg_replace('/\.htm(l)*$/i','.php',$thispage));
 	}
 
@@ -213,8 +213,8 @@ function CMSB($section='', $method='', $options=array()){
 	if(!isset($handleContentOutput))$handleContentOutput=true;
 	if(!isset($convertExistingStaticHTML))$convertExistingStaticHTML=false;
 	if(!isset($initialText))$initialText='&nbsp;';
-	if(!$editSectionLabel)$editSectionLabel='edit section';
-	if(!$defaultContentTagType)$defaultContentTagType='div'; //div|span
+	if(empty($editSectionLabel))$editSectionLabel='edit section';
+	if(empty($defaultContentTagType))$defaultContentTagType='div'; //div|span
 	
 	//get or assign the name for the section
 	if(!isset($CMSB['sections']))$CMSB['sections']=array();
@@ -244,12 +244,12 @@ function CMSB($section='', $method='', $options=array()){
 	$varProcessServer=strtolower($varProcessServer[count($varProcessServer)-2].'.'.$varProcessServer[count($varProcessServer)-1]);
 
 	//where data is stored
-	if(!$table)$table=$CMSBx['defaultTableName'];
+	if(empty($table)) $table=$CMSBx['defaultTableName'];
 	//make sure table exists
-	if(!$CMSB['tables'][$table]){
-		if($tables=q("SHOW TABLES ".($CMSDb?' IN '.$CMSDb:''), O_ARRAY, $cnx)){
+	if(empty($CMSB['tables'][$table])){
+		if($tables=q("SHOW TABLES ".(!empty($CMSDb) ? ' IN ' . $CMSDb:''), O_ARRAY, $cnx)){
 			foreach($tables as $n=>$v){
-				if(!$CMSDb){
+				if(empty($CMSDb)){
 					foreach($v as $o=>$w)preg_match('/Tables_in_(.+)/',$o,$a);
 					$CMSDb=$a[1];
 					$CMSB['sections'][$section]['db']=$CMSDb;
@@ -273,7 +273,7 @@ function CMSB($section='', $method='', $options=array()){
 			}
 		}
 	}
-	if($CMSB['jsCheck']<2){
+	if(isset($CMSB['jsCheck']) && $CMSB['jsCheck'] < 2){
 		$jsCheck='<\'+\'script language="javascript" type="text/javascript" src="/Library/js/CMSB_v300.js"></\'+\'script>';
 		$jsCheck='if(typeof CMSB==\'undefined\')document.write(\''.$jsCheck.'\');';
 		$jsCheck.=' if(typeof thispage==\'undefined\'){ ';
@@ -605,24 +605,24 @@ function CMSB($section='', $method='', $options=array()){
 			$comment.=' -->';
 			$comment.="\n";
 			echo $comment;
-			?><div id="<?php echo $section?>" <?php if($setClass)echo 'class="'.$setClass.'"';?> ondblclick="CMSBEditFromContent(this,event);" method="<?php echo $method?>" <?php if(!$adminMode && !trim($content['Content']) && !$CMSBx['alwaysShowEmptySections'] && !$showEmptySection)echo 'style="display:none;"';?>><?php
+			?><div id="<?php echo $section?>" <?php if(!empty($setClass))echo 'class="'.$setClass.'"';?> ondblclick="CMSBEditFromContent(this,event);" method="<?php echo $method?>" <?php if(!$adminMode && !trim($content['Content']) && empty($CMSBx['alwaysShowEmptySections']) && empty($showEmptySection)) echo 'style="display:none;"';?>><?php
 			echo $content['Content'];
 			echo "\n";
 			?></div><?php
 			$body=ob_get_contents();
 			ob_end_clean();
-			$body=preg_replace('/<div/i','<'.($setTagAs ? strtolower($setTagAs) : $defaultContentTagType),$body);
-			$body=preg_replace('/\/div>/i','/'.($setTagAs ? strtolower($setTagAs) : $defaultContentTagType).'>',$body);
+			$body=preg_replace('/<div/i','<'.(!empty($setTagAs) ? strtolower($setTagAs) : $defaultContentTagType),$body);
+			$body=preg_replace('/\/div>/i','/'.(!empty($setTagAs) ? strtolower($setTagAs) : $defaultContentTagType).'>',$body);
 
 			//output the link and the content with a secure tie between them
-			if($adminMode || $showEditLink){
+			if($adminMode || !empty($showEditLink)){
 				echo str_replace('[CMSB_SECTION_TOKEN]',"'".addslashes($section)."'",$link);
 				echo "\n";
 			}
 			echo $body;
 		}else{
 			//output the link [above], don't pass section in function call
-			if($adminMode || $showEditLink){
+			if($adminMode || !empty($showEditLink)){
 				echo str_replace('[CMSB_SECTION_TOKEN]','null',$link);
 				echo "\n";
 			}
@@ -630,7 +630,7 @@ function CMSB($section='', $method='', $options=array()){
 	}else{
 		if($convertExistingStaticHTML){
 			//just for this instance of no content, don't output the div
-			if($adminMode || $showEditLink){
+			if($adminMode || !empty($showEditLink)){
 				echo str_replace('[CMSB_SECTION_TOKEN]','null',$link);
 				echo "\n";
 			}
@@ -643,23 +643,23 @@ function CMSB($section='', $method='', $options=array()){
 			$comment.=' -->';
 			$comment.="\n";
 			echo $comment;
-			?><div id="<?php echo $section?>" <?php if($setClass)echo 'class="'.$setClass.'"';?> ondblclick="CMSBEditFromContent(this,event);" method="<?php echo $method?>" <?php if(!$adminMode && !trim($content['Content']) && !$CMSBx['alwaysShowEmptySections'] && !$showEmptySection)echo 'style="display:none;"';?>><?php
+			?><div id="<?php echo $section?>" <?php if(!empty($setClass)) echo 'class="'.$setClass.'"';?> ondblclick="CMSBEditFromContent(this,event);" method="<?php echo $method?>" <?php if(!$adminMode && !trim($content['Content']) && empty($CMSBx['alwaysShowEmptySections']) && empty($showEmptySection))echo 'style="display:none;"';?>><?php
 			echo $initialText;
 			?></div><?php
 			$body=ob_get_contents();
 			ob_end_clean();
-			$body=preg_replace('/<div/i','<'.($setTagAs ? strtolower($setTagAs) : $defaultContentTagType),$body);
-			$body=preg_replace('/\/div>/i','/'.($setTagAs ? strtolower($setTagAs) : $defaultContentTagType).'>',$body);
+			$body=preg_replace('/<div/i','<'.(!empty($setTagAs) ? strtolower($setTagAs) : $defaultContentTagType),$body);
+			$body=preg_replace('/\/div>/i','/'.(!empty($setTagAs) ? strtolower($setTagAs) : $defaultContentTagType).'>',$body);
 
 			//output the link and the content with a secure tie between them
-			if($adminMode || $showEditLink){
+			if($adminMode || !empty($showEditLink)){
 				echo str_replace('[CMSB_SECTION_TOKEN]',"'".addslashes($section)."'",$link);
 				echo "\n";
 			}
 			echo $body;
 		}else{
 			//just output the link
-			if($adminMode || $showEditLink){
+			if($adminMode || !empty($showEditLink)){
 				echo str_replace('[CMSB_SECTION_TOKEN]','null',$link);
 				echo "\n";
 			}
