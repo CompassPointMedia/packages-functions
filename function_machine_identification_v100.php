@@ -1,6 +1,6 @@
 <?php
 $functionVersions['machine_identification']=1.00;
-function machine_identification($postTime,$browser){
+function machine_identification($postTime, $browser){
 	//######################### NOTE!!!! #########################
 	//
 	//		this script is also found on the relatebase console 
@@ -11,7 +11,7 @@ function machine_identification($postTime,$browser){
 	//added temp here - this is going into system_machines but eventually needs to go into bais_logs
 	global $FUNCTION_ROOT, $parse_javascript_gmt_date, $environment;
 	if(!function_exists('parse_javascript_gmt_date'))require($FUNCTION_ROOT.'/function_parse_javascript_gmt_date_v120.php');
-	if($postLoginTime=parse_javascript_gmt_date($postTime, $browser)){
+	if($postLoginTime=parse_javascript_gmt_date($postTime, $_SERVER['HTTP_USER_AGENT'])){
 		$_SESSION['loginTimeFulltext']=date('Y-m-d H:i:s',$postLoginTime);
 		$_SESSION['loginTime']=preg_replace('/[^0-9]*/','',$_SESSION['loginTimeFulltext']);
 		$_SESSION['loginTimeTZ']=$parse_javascript_gmt_date['TZ'];

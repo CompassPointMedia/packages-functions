@@ -11,35 +11,36 @@ function pJ_call_edit($options=array()){
 	*/
 	global $MASTER_USERNAME, $fromHdrBugs, $developerEmail, $pJEditability;
 	extract($options);
-	if($level){
+	if(!empty($level)){
 		global $adminMode;
 		if($adminMode<$level)return;
 	}
-	if(!$editURL)$editURL='/_juliet_.editor.php';
-	if($thisnode){
+	if(empty($editURL)) $editURL='/_juliet_.editor.php';
+	if(!empty($thisnode)){
 		//OK
-	}else if(!$pJCurrentContentRegion){
+	}else if(empty($pJCurrentContentRegion)){
 		global $pJCurrentContentRegion;
 		if(!$pJCurrentContentRegion)return;
 	}
-	if(!$handle){
+	if(empty($handle)){
 		global $handle;
 		if(!$handle){
 			mail($developerEmail, 'Error in '.$MASTER_USERNAME.':'.end(explode('/',__FILE__)).', line '.__LINE__,get_globals($err='no handle declared for component file'),$fromHdrBugs);
 			return;
 		}
 	}
-	if(!$formNode)$formNode='default';
-	if(!$location)$location=(strstr(__FILE__,'components-juliet')?'JULIET_COMPONENT_ROOT':'MASTER_COMPONENT_ROOT');
-	if(!$file)return;
+	$f = __FILE__;
+	if(empty($formNode))$formNode='default';
+	if(empty($location))$location=(strstr($f, 'components-juliet')?'JULIET_COMPONENT_ROOT':'MASTER_COMPONENT_ROOT');
+	if(empty($file))return;
 	
-	?><a href="<?php echo $editURL;?>?<?php echo $thissection ? 'thissection='.$thissection : ($thisnode ? '_thisnode_='.$thisnode : 'pJCurrentContentRegion='.$pJCurrentContentRegion); ?>&handle=<?php echo $handle;?>&location=<?php echo $location;?>&file=<?php echo $file;?>&formNode=<?php echo $formNode;?><?php
-	if($parameters)
+	?><a href="<?php echo $editURL;?>?<?php echo !empty($thissection) ? 'thissection='.$thissection : (!empty($thisnode) ? '_thisnode_='.$thisnode : 'pJCurrentContentRegion='.$pJCurrentContentRegion); ?>&handle=<?php echo $handle;?>&location=<?php echo $location;?>&file=<?php echo $file;?>&formNode=<?php echo $formNode;?><?php
+	if(!empty($parameters))
 	foreach($parameters as $n=>$v){
 		echo '&'.$n.'='.urlencode($v);
 	}
 	?>" class="_editLink_<?php echo $pJEditability ? $pJEditability : 1;?>" onclick="return ow(this.href,'l1_editor','720,600');"><img src="/images/i/plusminus-plus.gif" alt="edit" /><?php
-	if($label)echo '&nbsp;'.$label;
+	if(!empty($label))echo '&nbsp;'.$label;
 	?></a><?php
 }
 function pJ_getdata($options, $default=NULL){

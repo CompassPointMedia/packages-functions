@@ -247,7 +247,7 @@ function CMSB($section='', $method='', $options=array()){
 	if(empty($table)) $table=$CMSBx['defaultTableName'];
 	//make sure table exists
 	if(empty($CMSB['tables'][$table])){
-		if($tables=q("SHOW TABLES ".(!empty($CMSDb)?' IN '.$CMSDb:''), O_ARRAY, $cnx)){
+		if($tables=q("SHOW TABLES ".(!empty($CMSDb) ? ' IN ' . $CMSDb:''), O_ARRAY, $cnx)){
 			foreach($tables as $n=>$v){
 				if(empty($CMSDb)){
 					foreach($v as $o=>$w)preg_match('/Tables_in_(.+)/',$o,$a);
@@ -274,7 +274,7 @@ function CMSB($section='', $method='', $options=array()){
 		}
 	}
 	if(!isset($CMSB['jsCheck'])) $CMSB['jsCheck'] = 0;
-	if($CMSB['jsCheck']<2){
+	if($CMSB['jsCheck'] < 2){
 		$jsCheck='<\'+\'script language="javascript" type="text/javascript" src="/Library/js/CMSB_v300.js"></\'+\'script>';
 		$jsCheck='if(typeof CMSB==\'undefined\')document.write(\''.$jsCheck.'\');';
 		$jsCheck.=' if(typeof thispage==\'undefined\'){ ';
@@ -606,14 +606,14 @@ function CMSB($section='', $method='', $options=array()){
 			$comment.=' -->';
 			$comment.="\n";
 			echo $comment;
-			?><div id="<?php echo $section?>" <?php if($setClass)echo 'class="'.$setClass.'"';?> ondblclick="CMSBEditFromContent(this,event);" method="<?php echo $method?>" <?php if(!$adminMode && !trim($content['Content']) && !$CMSBx['alwaysShowEmptySections'] && !$showEmptySection)echo 'style="display:none;"';?>><?php
+			?><div id="<?php echo $section?>" <?php if(!empty($setClass))echo 'class="'.$setClass.'"';?> ondblclick="CMSBEditFromContent(this,event);" method="<?php echo $method?>" <?php if(!$adminMode && !trim($content['Content']) && empty($CMSBx['alwaysShowEmptySections']) && empty($showEmptySection)) echo 'style="display:none;"';?>><?php
 			echo $content['Content'];
 			echo "\n";
 			?></div><?php
 			$body=ob_get_contents();
 			ob_end_clean();
-			$body=preg_replace('/<div/i','<'.($setTagAs ? strtolower($setTagAs) : $defaultContentTagType),$body);
-			$body=preg_replace('/\/div>/i','/'.($setTagAs ? strtolower($setTagAs) : $defaultContentTagType).'>',$body);
+			$body=preg_replace('/<div/i','<'.(!empty($setTagAs) ? strtolower($setTagAs) : $defaultContentTagType),$body);
+			$body=preg_replace('/\/div>/i','/'.(!empty($setTagAs) ? strtolower($setTagAs) : $defaultContentTagType).'>',$body);
 
 			//output the link and the content with a secure tie between them
 			if($adminMode || !empty($showEditLink)){

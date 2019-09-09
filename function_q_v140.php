@@ -515,8 +515,6 @@ function sub_e($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate){
 
     if($qx['useRemediation']){
         prn('incrementing remediationStep from ' . $qx['remediationStep'] . ' to ' . ($qx['remediationStep'] + 1). ', vars:');
-        $a = func_get_args();
-        prn($a);
         $qx['remediationStep']++;
     }
     /*
@@ -641,7 +639,7 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate){
 
     Our first job is to determine what db and table(s) are being called. r() will use some new functions to be developed for parsing SQL queries which I don't have yet.
      **/
-    global $fl, $ln, $qx, $qr, $acct, $FUNCTION_ROOT, $MASTER_DATABASE, $developerEmail, $fromHdrBugs, $rCalled;
+    global $qx, $qr, $acct, $FUNCTION_ROOT, $MASTER_DATABASE, $developerEmail, $fromHdrBugs, $rCalled;
     $query=$qr['query'];
 
     //handle connection and database
@@ -676,8 +674,10 @@ function r($errDieMethod, $type, $arg_list, $system_err, $qDoNotRemediate){
 
         $createTable = str_replace('{RB_ACCTNAME}', $acct, $createTable);
 
+        $createTable = preg_replace('/ALGORITHM=UNDEFINED DEFINER.+SQL SECURITY DEFINER VIEW/', 'OR REPLACE VIEW', $createTable);
+
         ob_start();
-        q($createTable, O_DO_NOT_REMEDIATE, C_SUPER);
+        q($createTable, /* O_DO_NOT_REMEDIATE, - removed this so a view creation which depents on another table can get the table for example - but it is rather scary.. worked with _v_staff_master_information, created all the underlying tables, about 5 of them. */ C_SUPER);
         $err=ob_get_contents();
         ob_end_clean();
 

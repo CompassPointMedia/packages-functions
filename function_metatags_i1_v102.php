@@ -1,7 +1,7 @@
 <?php
 $functionVersions['metatags_i1']=1.02;
 function metatags_i1($n, $options=array()){
-	global $lang, $metatags, $thispage, $thisfolder, $thisnode, $qr, $qx, $functionVersions;
+	global $lang, $metatags, $thispage, $thisfolder, $thisnode, $qx, $qr, $functionVersions;
 	/*
 	2012-01-17: forked off so that I can pull from multi languages
 	2010-01-14: added a wierd idea, if the first param is not meta|title, it's the default title - easier to convert old pages, for example
@@ -16,6 +16,8 @@ function metatags_i1($n, $options=array()){
 	*/
 	@extract($options);
 	if(empty($cnx)) $cnx = $qx['defCnxMethod'];
+	if(empty($cnx))$cnx=$qx['defCnxMethod'];
+	$str = '';
 	
 	if($a=q(
 		$thisnode ? 
@@ -112,4 +114,4 @@ function metatags_i1($n, $options=array()){
 		}
 	}
 }
-?>
+
